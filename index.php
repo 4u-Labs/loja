@@ -13,14 +13,71 @@
     <meta name="theme-color" content="#10b981">
     <link rel="canonical" href="https://4u.ia.br/loja/">
 
+    <meta name="description" content="4u.ia.br App Store — Plataforma de alta performance para descoberta e uso de aplicativos modulares, ferramentas com inteligência artificial e soluções de produtividade." />
+    <meta name="keywords" content="aplicativos, webapps, inteligência artificial, IA, produtividade, ferramentas online, app store, utilitários, automação, 4u.ia.br" />
+    <meta name="author" content="4u.ia.br" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
     <!-- Meta Tags OG (Premium Finish) -->
-    <meta property="og:title" content="4u.ia.br — App Store Premium" />
-    <meta property="og:description"
-        content="Plataforma de alta performance para descoberta e uso de aplicativos modulares." />
-    <meta property="og:image" content="https://4u.ia.br/loja/icon-512.png" />
-    <meta property="og:url" content="https://4u.ia.br" />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:url" content="https://4u.ia.br/loja/" />
+    <meta property="og:site_name" content="4u.ia.br — App Store" />
+    <meta property="og:title" content="4u.ia.br — Loja de Aplicativos & Inteligência Artificial" />
+    <meta property="og:description" content="Plataforma de alta performance para descoberta e uso de aplicativos modulares e IA." />
+    <meta property="og:image" content="https://4u.ia.br/loja/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="4u.ia.br App Store" />
+    <meta property="og:locale" content="pt_BR" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://4u.ia.br/loja/" />
+    <meta name="twitter:title" content="4u.ia.br — Loja de Aplicativos & Inteligência Artificial" />
+    <meta name="twitter:description" content="Descubra aplicativos modulares, ferramentas com IA e utilitários de alta performance." />
+    <meta name="twitter:image" content="https://4u.ia.br/loja/icon-512.png" />
+
+    <!-- Schema.org JSON-LD Structured Data for Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://4u.ia.br/loja/#website",
+          "url": "https://4u.ia.br/loja/",
+          "name": "4u.ia.br App Store",
+          "description": "Loja de aplicativos web, ferramentas com inteligência artificial e soluções de alta produtividade.",
+          "inLanguage": "pt-BR",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://4u.ia.br/loja/#/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://4u.ia.br/#organization",
+          "name": "4u.ia.br",
+          "url": "https://4u.ia.br",
+          "logo": "https://4u.ia.br/loja/icon-512.png"
+        },
+        {
+          "@type": "CollectionPage",
+          "@id": "https://4u.ia.br/loja/#webpage",
+          "url": "https://4u.ia.br/loja/",
+          "name": "4u.ia.br — Catálogo de Aplicativos & IA",
+          "isPartOf": {
+            "@id": "https://4u.ia.br/loja/#website"
+          },
+          "about": {
+            "@id": "https://4u.ia.br/#organization"
+          },
+          "description": "Catálogo completo de aplicativos web e ferramentas modulares 4u.ia.br."
+        }
+      ]
+    }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -1258,7 +1315,41 @@
         async function uploadImage(file) { if (API.backend === 'static' || API.backend === 'none' || !API.upload) { return await fileToDataUrl(file); } showSaveIndicator('Enviando imagem...'); try { const formData = new FormData(); formData.append('image', file); const res = await fetch(API.upload, { method: 'POST', headers: auth.getAuthHeader(), body: formData }); if (res.status === 401) { hideSaveIndicator(); auth.logout(); toast('Sessão expirada.', 'warn'); showLoginDialog(); throw new Error('Não autorizado'); } if (!res.ok) throw new Error(`Erro no upload (HTTP ${res.status})`); const result = await res.json(); showSaveSuccess(); return result.url; } catch (err) { hideSaveIndicator(); toast('Erro ao enviar: ' + err.message, 'err'); throw err; } }
         async function uploadBase64Image(dataUrl, filename = 'image') { if (!dataUrl || !dataUrl.startsWith('data:image')) return dataUrl; if (API.backend === 'static' || API.backend === 'none' || !API.uploadBase64) return dataUrl; showSaveIndicator('Processando...'); try { const res = await fetch(API.uploadBase64, { method: 'POST', headers: auth.getHeaders(), body: JSON.stringify({ dataUrl, filename }) }); if (res.status === 401) { hideSaveIndicator(); auth.logout(); toast('Sessão expirada.', 'warn'); showLoginDialog(); throw new Error('Não autorizado'); } if (!res.ok) throw new Error(`Erro (HTTP ${res.status})`); const result = await res.json(); showSaveSuccess(); return result.url; } catch (err) { hideSaveIndicator(); return dataUrl; } }
         function fileToDataUrl(file) { return new Promise((resolve, reject) => { const fr = new FileReader(); fr.onload = () => resolve(fr.result); fr.onerror = reject; fr.readAsDataURL(file); }); }
-        function normalizeCatalogPayload(parsed) { const obj = (parsed && typeof parsed === 'object') ? parsed : {}; const apps = Array.isArray(parsed) ? parsed : (Array.isArray(obj.apps) ? obj.apps : []); const prefs = (obj.prefs && typeof obj.prefs === 'object') ? obj.prefs : {}; const now = Date.now(); const normalizedApps = apps.map(a => ({ id: safeText(a.id) || uid(), title: safeText(a.title), shortDescription: safeText(a.shortDescription), fullDescription: safeText(a.fullDescription), tags: normalizeTags(a.tags), category: safeText(a.category), iconUrl: safeText(a.iconUrl) || safeText(a.iconDataUrl), heroImageUrl: safeText(a.heroImageUrl) || safeText(a.heroImageDataUrl), link: safeText(a.link), status: safeText(a.status) || 'Estável', createdAt: Number(a.createdAt) || now, updatedAt: Number(a.updatedAt) || now, clicks: Number(a.clicks) || 0 })).filter(a => a.title && a.link); return { apps: normalizedApps, prefs: { storeLogoUrl: safeText(prefs.storeLogoUrl), heroAppId: safeText(prefs.heroAppId) } }; }
+        function normalizeCatalogPayload(parsed) {
+            const obj = (parsed && typeof parsed === 'object') ? parsed : {};
+            const apps = Array.isArray(parsed) ? parsed : (Array.isArray(obj.apps) ? obj.apps : []);
+            const prefs = (obj.prefs && typeof obj.prefs === 'object') ? obj.prefs : {};
+            const now = Date.now();
+            const normalizedApps = apps.map(a => ({
+                id: safeText(a.id) || uid(),
+                title: safeText(a.title),
+                shortDescription: safeText(a.shortDescription),
+                fullDescription: safeText(a.fullDescription),
+                tags: normalizeTags(a.tags),
+                category: safeText(a.category),
+                iconUrl: safeText(a.iconUrl) || safeText(a.iconDataUrl),
+                heroImageUrl: safeText(a.heroImageUrl) || safeText(a.heroImageDataUrl),
+                link: safeText(a.link),
+                status: safeText(a.status) || 'Estável',
+                createdAt: Number(a.createdAt) || now,
+                updatedAt: Number(a.updatedAt) || now,
+                clicks: Number(a.clicks) || 0
+            })).filter(a => a.title && a.link);
+            return {
+                apps: normalizedApps,
+                prefs: {
+                    storeLogoUrl: safeText(prefs.storeLogoUrl),
+                    heroAppId: safeText(prefs.heroAppId),
+                    announcementActive: !!prefs.announcementActive,
+                    announcementText: safeText(prefs.announcementText),
+                    announcementType: safeText(prefs.announcementType) || 'emerald',
+                    announcementLink: safeText(prefs.announcementLink),
+                    storeTitle: safeText(prefs.storeTitle),
+                    storeSlogan: safeText(prefs.storeSlogan),
+                    storeDescription: safeText(prefs.storeDescription)
+                }
+            };
+        }
         function downloadJson(filename, obj) { const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
         function catalogDraftPayload() { return { version: 1, exportedAt: new Date().toISOString(), prefs: state.prefs, apps: state.apps }; }
 
@@ -1322,7 +1413,53 @@
         }
 
         // -------- Global state --------
-        const state = { apps: [], prefs: { storeLogoUrl: '', heroAppId: '' }, store: { q: '', category: 'Todas', sortBy: 'destaque', pageSize: 18, visible: 18, loadingMore: false, favoritesOnly: false }, admin: { tab: 'stats', statsData: null, statsLoading: false, selectedId: null, listQ: '', categoryFilter: 'Todas' }, meta: { loaded: false, error: '', loadedAt: null, lastSaved: null, dirty: false, saving: false }, slider: { currentIndex: 0, autoplayTimer: null, autoplayInterval: 5000 } };
+        const state = {
+            apps: [],
+            prefs: {
+                storeLogoUrl: '',
+                heroAppId: '',
+                announcementActive: false,
+                announcementText: '',
+                announcementType: 'emerald',
+                announcementLink: '',
+                storeTitle: '',
+                storeSlogan: '',
+                storeDescription: ''
+            },
+            store: {
+                q: '',
+                category: 'Todas',
+                sortBy: 'destaque',
+                pageSize: 18,
+                visible: 18,
+                loadingMore: false,
+                favoritesOnly: false
+            },
+            admin: {
+                tab: 'stats',
+                statsData: null,
+                statsLoading: false,
+                selectedId: null,
+                listQ: '',
+                categoryFilter: 'Todas',
+                suggestions: [],
+                suggestionsLoading: false,
+                suggestionsLoaded: false
+            },
+            meta: {
+                loaded: false,
+                error: '',
+                loadedAt: null,
+                lastSaved: null,
+                dirty: false,
+                saving: false
+            },
+            slider: {
+                currentIndex: 0,
+                autoplayTimer: null,
+                autoplayInterval: 5000
+            }
+        };
 
         // -------- Telemetria & Analytics --------
         async function trackVisit() {
@@ -1367,6 +1504,54 @@
                 state.admin.statsLoading = false;
             }
             return null;
+        }
+
+        async function fetchSuggestions(force = false) {
+            if (API.backend !== 'php') return [];
+            if (state.admin.suggestionsLoaded && !force) return state.admin.suggestions;
+            state.admin.suggestionsLoading = true;
+            try {
+                const res = await fetch('api.php?action=suggestions-list', {
+                    headers: auth.getHeaders()
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    state.admin.suggestions = data.suggestions || [];
+                    state.admin.suggestionsLoaded = true;
+                    return state.admin.suggestions;
+                } else if (res.status === 401) {
+                    auth.logout();
+                    showLoginDialog();
+                }
+            } catch (e) {
+                console.error('Erro ao buscar sugestões:', e);
+                toast('Erro ao buscar sugestões: ' + e.message, 'err');
+            } finally {
+                state.admin.suggestionsLoading = false;
+            }
+            return state.admin.suggestions;
+        }
+
+        async function updateSuggestionStatus(id, status) {
+            try {
+                const res = await fetch('api.php?action=suggestion-status', {
+                    method: 'POST',
+                    headers: auth.getHeaders(),
+                    body: JSON.stringify({ id, status })
+                });
+                if (!res.ok) throw new Error('Falha ao processar requisição');
+                if (status === 'excluir') {
+                    state.admin.suggestions = state.admin.suggestions.filter(s => Number(s.id) !== Number(id));
+                    toast('Registro excluído!', 'ok');
+                } else {
+                    const s = state.admin.suggestions.find(item => Number(item.id) === Number(id));
+                    if (s) s.status = status;
+                    toast(`Status marcado como: ${status}`, 'ok');
+                }
+                renderAdmin();
+            } catch (err) {
+                toast('Erro: ' + err.message, 'err');
+            }
         }
         let autoSaveTimer = null; let searchDebounceTimer = null;
         function markDirtyAndSave() { state.meta.dirty = true; if (API.backend === 'static' || API.backend === 'none') return; if (autoSaveTimer) clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(async () => { if (state.meta.dirty && !state.meta.saving) { state.meta.saving = true; try { await saveCatalog(); } finally { state.meta.saving = false; } } }, 1000); }
@@ -1516,7 +1701,7 @@
                         ${logo ? `<img src="${escapeHtml(logo)}" alt="Logo" class="h-10 w-10 rounded-xl object-cover ring-1 ring-white/10" />` : `<div class="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 grid place-items-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`} 
                         <div>
                             <span class="text-lg font-bold text-white tracking-tight">4u.ia.br</span>
-                            <div class="text-xs text-zinc-500">Transformando idéias em apps</div>
+                            <div class="text-xs text-zinc-500">Transformando ideias em apps</div>
                         </div>
                     </div>
                     <div class="flex flex-wrap items-center gap-6 text-sm">
@@ -1764,6 +1949,129 @@
             `;
         }
 
+        // -------- Global Announcement Banner --------
+        function renderGlobalAnnouncement() {
+            if (!state.prefs.announcementActive || !state.prefs.announcementText) return '';
+            const text = safeText(state.prefs.announcementText);
+            const link = safeText(state.prefs.announcementLink);
+            const type = safeText(state.prefs.announcementType) || 'emerald';
+
+            const themes = {
+                emerald: {
+                    border: 'border-emerald-500/30',
+                    bg: 'from-emerald-500/15 via-teal-500/10 to-cyan-500/15',
+                    badge: 'bg-emerald-500/20 text-emerald-300 ring-emerald-500/30',
+                    btn: 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border-emerald-500/30',
+                    icon: '📢',
+                    label: 'COMUNICADO'
+                },
+                cyan: {
+                    border: 'border-cyan-500/30',
+                    bg: 'from-cyan-500/15 via-blue-500/10 to-teal-500/15',
+                    badge: 'bg-cyan-500/20 text-cyan-300 ring-cyan-500/30',
+                    btn: 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border-cyan-500/30',
+                    icon: '⚡',
+                    label: 'NOVIDADE'
+                },
+                amber: {
+                    border: 'border-amber-500/30',
+                    bg: 'from-amber-500/15 via-yellow-500/10 to-orange-500/15',
+                    badge: 'bg-amber-500/20 text-amber-300 ring-amber-400/30',
+                    btn: 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border-amber-500/30',
+                    icon: '⚠️',
+                    label: 'AVISO'
+                },
+                rose: {
+                    border: 'border-rose-500/30',
+                    bg: 'from-rose-500/15 via-pink-500/10 to-purple-500/15',
+                    badge: 'bg-rose-500/20 text-rose-300 ring-rose-500/30',
+                    btn: 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-rose-500/30',
+                    icon: '🔥',
+                    label: 'ALERTA'
+                }
+            };
+
+            const t = themes[type] || themes.emerald;
+
+            return `
+            <div class="relative overflow-hidden rounded-2xl border ${t.border} bg-gradient-to-r ${t.bg} p-4 sm:px-6 backdrop-blur-xl shadow-lg transition-all">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl shrink-0">${t.icon}</span>
+                        <div class="text-sm font-medium text-zinc-100">
+                            <span class="rounded-md px-2 py-0.5 text-xs font-semibold mr-2 ring-1 ${t.badge}">${t.label}</span>
+                            <span>${escapeHtml(text)}</span>
+                        </div>
+                    </div>
+                    ${link ? `
+                        <a href="${escapeHtml(link)}" ${link.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : ''} class="shrink-0 self-start sm:self-auto rounded-xl border px-3.5 py-1.5 text-xs font-semibold ${t.btn} transition-all flex items-center gap-1.5 cursor-pointer shadow-sm">
+                            <span>Ver Mais →</span>
+                        </a>
+                    ` : ''}
+                </div>
+            </div>`;
+        }
+
+        // -------- Suggestions & Feedback List Renderer --------
+        function renderSuggestionsList(items) {
+            if (!items || !items.length) {
+                return `
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-8 text-center text-sm text-zinc-400">
+                    <div class="text-3xl mb-2">📬</div>
+                    <div class="font-medium text-white mb-1">Nenhuma sugestão ou relato recebido no momento</div>
+                    <div class="text-xs text-zinc-500">Quando os visitantes utilizarem o botão "Sugerir App", os envios aparecerão aqui em tempo real.</div>
+                </div>`;
+            }
+
+            return items.map(s => {
+                const isBug = s.type === 'bug';
+                const typeBadge = isBug 
+                    ? `<span class="rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-semibold text-rose-300 ring-1 ring-rose-500/20">🐞 Relato de Bug</span>`
+                    : `<span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/20">💡 Sugestão de App</span>`;
+
+                const statusMap = {
+                    'pendente': `<span class="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/20">🟡 Pendente</span>`,
+                    'lido': `<span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-300 ring-1 ring-blue-400/20">🔵 Lido</span>`,
+                    'resolvido': `<span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/20">🟢 Resolvido</span>`
+                };
+                const statusBadge = statusMap[s.status] || `<span class="rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-xs text-zinc-300">${escapeHtml(s.status || 'pendente')}</span>`;
+                
+                let dateStr = '';
+                try {
+                    const d = new Date(Number(s.createdAt) || s.createdAt);
+                    dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                } catch (e) {
+                    dateStr = '';
+                }
+
+                return `
+                <div class="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5 transition-all hover:border-white/20">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            ${typeBadge}
+                            ${statusBadge}
+                            ${s.appName ? `<span class="text-sm font-semibold text-white">App: ${escapeHtml(s.appName)}</span>` : ''}
+                        </div>
+                        <div class="text-xs text-zinc-400">${dateStr}</div>
+                    </div>
+                    
+                    ${s.description ? `<p class="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed mb-3 bg-black/20 p-3 rounded-lg border border-white/5">${escapeHtml(s.description)}</p>` : ''}
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-white/5 text-xs">
+                        <div class="flex flex-wrap items-center gap-4 text-zinc-400">
+                            ${s.contact ? `<span class="flex items-center gap-1.5"><span class="text-zinc-500">Contato:</span> <strong class="text-zinc-200 font-medium">${escapeHtml(s.contact)}</strong></span>` : '<span class="text-zinc-600">Sem contato informado</span>'}
+                            ${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1 truncate max-w-xs">🔗 ${escapeHtml(s.url)}</a>` : ''}
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            ${s.status !== 'lido' ? `<button type="button" class="action-sug-btn px-2.5 py-1.5 rounded-lg border border-blue-500/20 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 transition-all font-medium cursor-pointer" data-id="${escapeHtml(s.id)}" data-action="lido">Marcar Lido</button>` : ''}
+                            ${s.status !== 'resolvido' ? `<button type="button" class="action-sug-btn px-2.5 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-all font-medium cursor-pointer" data-id="${escapeHtml(s.id)}" data-action="resolvido">Resolver</button>` : ''}
+                            <button type="button" class="action-sug-btn px-2.5 py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all font-medium cursor-pointer" data-id="${escapeHtml(s.id)}" data-action="excluir" title="Excluir do banco">Excluir</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
         // -------- Store View --------
         function renderStore() {
             stopSliderAutoplay();
@@ -1797,6 +2105,7 @@
 
             const main = `
     <section class="grid gap-6">
+        ${renderGlobalAnnouncement()}
         ${renderHeroSection({ total, shown: shownTotal })}
         ${renderStatsBar()}
         ${renderRecentAndFavoritesShelf()}
@@ -1909,8 +2218,8 @@
                             <span class="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-1.5 text-xs font-semibold text-white">Bem-vindo</span>
                             ${backendBadge()}
                         </div>
-                        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight gradient-text mb-4">Descubra apps incríveis</h1>
-                        <p class="text-zinc-400 max-w-xl text-lg">Confira nossa seleção exclusiva de webapps para alta produtividade e entretenimento.</p>
+                        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight gradient-text mb-4">${escapeHtml(state.prefs.storeTitle || 'Descubra apps incríveis')}</h1>
+                        <p class="text-zinc-400 max-w-xl text-lg">${escapeHtml(state.prefs.storeSlogan || 'Confira nossa seleção exclusiva de webapps para alta produtividade e entretenimento.')}</p>
                         <div class="mt-8 flex flex-wrap gap-4">
                             ${showAdmin ? `<a href="#/admin" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine">Configurar no Admin</a>` : ''}
                             <div class="text-sm text-zinc-500 self-center">${shown} de ${total} apps</div>
@@ -3121,6 +3430,9 @@
             if (state.admin.tab === 'stats' && !state.admin.statsData && !state.admin.statsLoading) {
                 fetchStats().then(() => renderAdmin());
             }
+            if (state.admin.tab === 'settings' && !state.admin.suggestionsLoaded && !state.admin.suggestionsLoading) {
+                fetchSuggestions().then(() => renderAdmin());
+            }
 
             const currentTab = state.admin.tab || 'stats';
             const categories = ['Todas', ...getCategories(state.apps)];
@@ -3128,7 +3440,7 @@
             const selected = state.apps.find(a => a.id === state.admin.selectedId) || null;
             const hasBackend = API.backend === 'node' || API.backend === 'php';
             const statusBadge = state.meta.saving ? `<span class="rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 ring-1 ring-amber-400/20 saving-indicator">Salvando...</span>` : hasBackend ? `<span class="rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300 ring-1 ring-emerald-400/20">✓ Sincronizado</span>` : `<span class="rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 ring-1 ring-amber-400/20">Offline</span>`;
-            const right = ` ${statusBadge} <button id="reloadServerBtn" class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm hover:bg-white/10 transition-all cursor-pointer">Recarregar</button> ${!hasBackend ? `<button id="downloadCatalogBtn" class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer">Baixar JSON</button>` : ''} <button id="logoutBtn" class="rounded-xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer">Sair</button> `;
+            const right = ` <a href="#/" class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm hover:bg-white/10 transition-all flex items-center gap-1.5 cursor-pointer text-zinc-300 hover:text-white" title="Voltar para a vitrine pública"><span>🏪 Ver Loja</span></a> ${statusBadge} <button id="reloadServerBtn" class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm hover:bg-white/10 transition-all cursor-pointer">Recarregar</button> ${!hasBackend ? `<button id="downloadCatalogBtn" class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer">Baixar JSON</button>` : ''} <button id="logoutBtn" class="rounded-xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer">Sair</button> `;
 
             let tabContent = '';
             if (currentTab === 'stats') {
@@ -3212,31 +3524,180 @@
             const hero = getHeroApp();
             const heroId = safeText(state.prefs.heroAppId);
             const options = state.apps.map(a => `<option value="${escapeHtml(a.id)}" ${a.id === heroId ? 'selected' : ''}>${escapeHtml(a.title)} — ${escapeHtml(a.category || 'Sem categoria')}</option>`).join('');
+
             return `
-            <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6">
-                <h2 class="text-base font-semibold text-white mb-4">Configurações da Loja</h2>
-                <div class="grid gap-5 lg:grid-cols-2">
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
-                        <div class="flex items-start gap-4">
-                            <img id="storeLogoPreview" alt="" src="${escapeHtml(currentLogo || defaultIcon('IA', 'emerald'))}" class="h-16 w-16 rounded-2xl object-cover ring-2 ring-white/10" />
-                            <div class="flex-1">
-                                <div class="text-sm font-semibold text-white">Logo da Loja</div>
-                                <div class="text-xs text-zinc-500 mt-1">Imagem quadrada (512×512 ideal)</div>
-                                <div class="mt-3 flex gap-2">
-                                    <label class="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10 transition-all"> 📷 Enviar <input id="storeLogoFile" type="file" accept="image/*" class="hidden" /></label>
-                                    <button id="storeLogoClear" type="button" class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10 transition-all cursor-pointer">Remover</button>
+            <div class="space-y-6">
+                <!-- 1. Comunicado Global (Banner do Topo) -->
+                <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/5 pb-4">
+                        <div>
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                <span>📢</span>
+                                <span>Comunicado Global (Banner do Topo)</span>
+                            </h2>
+                            <p class="text-xs text-zinc-400 mt-1">Exiba um banner de aviso, lançamento ou novidade no topo da vitrine da loja.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="announcementActiveInput" class="sr-only peer" ${state.prefs.announcementActive ? 'checked' : ''}>
+                                <div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                <span class="ml-2.5 text-xs font-semibold ${state.prefs.announcementActive ? 'text-emerald-300' : 'text-zinc-400'}">${state.prefs.announcementActive ? 'Ativo na Loja' : 'Inativo'}</span>
+                            </label>
+                            <button type="button" id="saveAnnouncementBtn" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer shadow-sm">Salvar Banner</button>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Texto do Comunicado</label>
+                            <input id="announcementTextInput" type="text" value="${escapeHtml(state.prefs.announcementText || '')}" placeholder="Ex: Novos aplicativos com IA adicionados nesta semana! Aproveite para testar." class="w-full rounded-xl border border-white/10 bg-[#0a0c14] px-4 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/50" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Estilo / Tema Visual</label>
+                            <select id="announcementTypeInput" class="w-full rounded-xl border border-white/10 bg-[#0a0c14] px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 cursor-pointer">
+                                <option value="emerald" ${state.prefs.announcementType === 'emerald' ? 'selected' : ''}>🟢 Esmeralda (Informativo / Sucesso)</option>
+                                <option value="cyan" ${state.prefs.announcementType === 'cyan' ? 'selected' : ''}>🔵 Ciano (Lançamento / Tecnologia)</option>
+                                <option value="amber" ${state.prefs.announcementType === 'amber' ? 'selected' : ''}>🟡 Âmbar (Aviso / Importante)</option>
+                                <option value="rose" ${state.prefs.announcementType === 'rose' ? 'selected' : ''}>🔴 Carmim (Alerta / Manutenção)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Link Opcional de Ação</label>
+                            <input id="announcementLinkInput" type="text" value="${escapeHtml(state.prefs.announcementLink || '')}" placeholder="https://4u.ia.br/... ou #/app/..." class="w-full rounded-xl border border-white/10 bg-[#0a0c14] px-4 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/50" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Sugestões & Feedbacks da Comunidade -->
+                <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/5 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                    <span>💡</span>
+                                    <span>Sugestões & Feedbacks da Comunidade</span>
+                                </h2>
+                                <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/20">${(state.admin.suggestions || []).length} mensagens</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 mt-1">Ideias de novos apps e relatos de bugs enviados pelos visitantes no botão "Sugerir App".</p>
+                        </div>
+                        <button type="button" id="refreshSuggestionsBtn" class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3.5 py-2 text-xs font-medium text-zinc-300 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto">
+                            <svg class="${state.admin.suggestionsLoading ? 'animate-spin' : ''}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            <span>Atualizar Mensagens</span>
+                        </button>
+                    </div>
+                    <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                        ${renderSuggestionsList(state.admin.suggestions)}
+                    </div>
+                </div>
+
+                <!-- 3. Central de Backup com 1 Clique -->
+                <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6 space-y-4">
+                    <div class="border-b border-white/5 pb-4">
+                        <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                            <span>📦</span>
+                            <span>Central de Backup com 1 Clique</span>
+                        </h2>
+                        <p class="text-xs text-zinc-400 mt-1">Exporte cópias de segurança instantâneas do banco de dados e do catálogo para nunca perder nada.</p>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 text-emerald-300 font-semibold text-sm mb-1">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                    <span>Banco de Dados SQLite (dados.db)</span>
                                 </div>
+                                <p class="text-xs text-zinc-400 leading-relaxed mt-1">
+                                    Arquivo SQLite com todos os apps, cliques, histórico completo de telemetria e visitas, sugestões e configurações.
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                                <span class="text-[11px] text-zinc-500">Formato binário .db</span>
+                                <button type="button" id="backupDbBtn" class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 px-4 py-2 text-xs font-semibold text-white transition-all btn-shine flex items-center gap-1.5 cursor-pointer shadow-sm">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Baixar SQLite (.db)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 text-cyan-300 font-semibold text-sm mb-1">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                    <span>Catálogo de Apps (catalog.json)</span>
+                                </div>
+                                <p class="text-xs text-zinc-400 leading-relaxed mt-1">
+                                    Exportação portátil em JSON padrão. Ideal para migração rápida, importação em outros ambientes ou versionamento git.
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                                <span class="text-[11px] text-zinc-500">JSON com ${state.apps.length} apps</span>
+                                <button type="button" id="backupJsonBtn" class="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 px-4 py-2 text-xs font-semibold text-white transition-all btn-shine flex items-center gap-1.5 cursor-pointer shadow-sm">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Exportar JSON</span>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
-                        <div class="text-sm font-semibold text-white">Super Destaque</div>
-                        <div class="text-xs text-zinc-500 mt-1 mb-3">App que aparece no topo da loja</div>
-                        <select id="heroAppSelect" class="w-full rounded-xl border border-white/10 bg-[#0a0c14] px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all cursor-pointer">
-                            <option value="" ${!heroId ? 'selected' : ''}>Automático (1º Destaque)</option>
-                            ${options}
-                        </select>
-                        <div class="mt-3 text-xs text-zinc-500">Atual: <span class="text-white font-medium">${escapeHtml(hero?.title || 'Nenhum')}</span></div>
+                </div>
+
+                <!-- 4. Identidade da Loja & Textos SEO -->
+                <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/5 pb-4">
+                        <div>
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                <span>🔍</span>
+                                <span>Identidade & Textos da Vitrine</span>
+                            </h2>
+                            <p class="text-xs text-zinc-400 mt-1">Personalize os títulos e slogans da loja exibidos para os visitantes e nos motores de busca.</p>
+                        </div>
+                        <button type="button" id="saveIdentityBtn" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer shadow-sm self-start sm:self-auto">Salvar Textos</button>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Título Principal da Vitrine (Hero)</label>
+                            <input id="storeTitleInput" type="text" value="${escapeHtml(state.prefs.storeTitle || '')}" placeholder="Descubra apps incríveis" class="w-full rounded-xl border border-white/10 bg-[#0a0c14] px-4 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/50" />
+                            <div class="text-[11px] text-zinc-500 mt-1">Padrão: Descubra apps incríveis</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-400 mb-1.5">Slogan / Subtítulo da Vitrine</label>
+                            <input id="storeSloganInput" type="text" value="${escapeHtml(state.prefs.storeSlogan || '')}" placeholder="Confira nossa seleção exclusiva de webapps para alta produtividade e entretenimento." class="w-full rounded-xl border border-white/10 bg-[#0a0c14] px-4 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/50" />
+                            <div class="text-[11px] text-zinc-500 mt-1">Aparece no cabeçalho e logo abaixo do título</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Logo da Loja & Super Destaque -->
+                <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6 space-y-4">
+                    <div class="border-b border-white/5 pb-4">
+                        <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                            <span>🎨</span>
+                            <span>Logo da Loja & Super Destaque</span>
+                        </h2>
+                        <p class="text-xs text-zinc-400 mt-1">Configuração visual da marca e seleção do aplicativo em destaque principal no slider do topo.</p>
+                    </div>
+                    <div class="grid gap-5 lg:grid-cols-2">
+                        <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                            <div class="flex items-start gap-4">
+                                <img id="storeLogoPreview" alt="" src="${escapeHtml(currentLogo || defaultIcon('IA', 'emerald'))}" class="h-16 w-16 rounded-2xl object-cover ring-2 ring-white/10" />
+                                <div class="flex-1">
+                                    <div class="text-sm font-semibold text-white">Logo da Loja</div>
+                                    <div class="text-xs text-zinc-500 mt-1">Imagem quadrada (512×512 ideal)</div>
+                                    <div class="mt-3 flex gap-2">
+                                        <label class="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10 transition-all"> 📷 Enviar <input id="storeLogoFile" type="file" accept="image/*" class="hidden" /></label>
+                                        <button id="storeLogoClear" type="button" class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10 transition-all cursor-pointer">Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                            <div class="text-sm font-semibold text-white">Super Destaque</div>
+                            <div class="text-xs text-zinc-500 mt-1 mb-3">App que aparece no topo da loja</div>
+                            <select id="heroAppSelect" class="w-full rounded-xl border border-white/10 bg-[#0a0c14] px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all cursor-pointer">
+                                <option value="" ${!heroId ? 'selected' : ''}>Automático (1º Destaque)</option>
+                                ${options}
+                            </select>
+                            <div class="mt-3 text-xs text-zinc-500">Atual: <span class="text-white font-medium">${escapeHtml(hero?.title || 'Nenhum')}</span></div>
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -3489,6 +3950,65 @@
                 markDirtyAndSave();
                 toast('Destaque atualizado!', 'ok');
             });
+
+            // Handlers da Aba Configurações
+            $('#announcementActiveInput')?.addEventListener('change', (e) => {
+                state.prefs.announcementActive = e.target.checked;
+                markDirtyAndSave();
+                toast(e.target.checked ? 'Comunicado ativado!' : 'Comunicado desativado.', 'info');
+            });
+
+            $('#saveAnnouncementBtn')?.addEventListener('click', () => {
+                state.prefs.announcementActive = !!$('#announcementActiveInput')?.checked;
+                state.prefs.announcementText = safeText($('#announcementTextInput')?.value);
+                state.prefs.announcementType = safeText($('#announcementTypeInput')?.value) || 'emerald';
+                state.prefs.announcementLink = safeText($('#announcementLinkInput')?.value);
+                markDirtyAndSave();
+                toast('Comunicado Global salvo com sucesso!', 'ok');
+                renderAdmin();
+            });
+
+            $('#refreshSuggestionsBtn')?.addEventListener('click', async () => {
+                toast('Buscando sugestões...', 'info');
+                await fetchSuggestions(true);
+                renderAdmin();
+                toast('Sugestões atualizadas!', 'ok');
+            });
+
+            $$('.action-sug-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const id = Number(btn.getAttribute('data-id'));
+                    const action = btn.getAttribute('data-action');
+                    if (action === 'excluir') {
+                        if (!confirm('Deseja realmente excluir este feedback/sugestão?')) return;
+                    }
+                    await updateSuggestionStatus(id, action);
+                });
+            });
+
+            $('#backupDbBtn')?.addEventListener('click', () => {
+                const token = auth.getToken();
+                if (!token) {
+                    toast('Sessão expirada. Faça login novamente.', 'warn');
+                    return;
+                }
+                toast('Iniciando download do backup SQLite...', 'info');
+                window.open('api.php?action=backup-db&token=' + encodeURIComponent(token), '_blank');
+            });
+
+            $('#backupJsonBtn')?.addEventListener('click', () => {
+                downloadJson('catalog.json', catalogDraftPayload());
+                toast('Catálogo exportado em JSON com sucesso!', 'ok');
+            });
+
+            $('#saveIdentityBtn')?.addEventListener('click', () => {
+                state.prefs.storeTitle = safeText($('#storeTitleInput')?.value);
+                state.prefs.storeSlogan = safeText($('#storeSloganInput')?.value);
+                markDirtyAndSave();
+                toast('Identidade da vitrine salva com sucesso!', 'ok');
+            });
+
 
             const listSearch = $('#adminListSearch');
             if (listSearch) {

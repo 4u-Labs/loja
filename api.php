@@ -549,6 +549,31 @@ switch ($action) {
         jsonResponse(['suggestions' => $list]);
         break;
 
+    case 'suggestion-status':
+        requireAuth();
+        $input = getRequestBodyJson();
+        $id = (int)($input['id'] ?? 0);
+        $status = trim($input['status'] ?? '');
+        if (!$id) jsonError('ID inválido', 400);
+        if ($status === 'excluir') {
+            $db->prepare("DELETE FROM suggestions WHERE id = ?")->execute([$id]);
+            jsonResponse(['success' => true, 'deleted' => true]);
+        } else {
+            $db->prepare("UPDATE suggestions SET status = ? WHERE id = ?")->execute([$status ?: 'lido', $id]);
+            jsonResponse(['success' => true, 'status' => $status]);
+        }
+        break;
+
+    case 'backup-db':
+        requireAuth();
+        $file = DB_FILE;
+        if (!file_exists($file)) jsonError('Banco de dados não encontrado', 404);
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="dados_backup_' . date('Y-m-d_H-i') . '.db"');
+        header('Content-Length: ' . filesize($file));
+        readfile($file);
+        exit;
+
     case 'login':
         $input = getRequestBodyJson();
         $password = $input['password'] ?? '';
