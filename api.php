@@ -351,6 +351,7 @@ switch ($action) {
         $body = getRequestBodyJson();
         $ref = trim($body['referrer'] ?? $_SERVER['HTTP_REFERER'] ?? '');
         $page = trim($body['page'] ?? '/loja/');
+        $isHeartbeat = !empty($body['heartbeat']);
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
         $ipHash = hash('sha256', $ip . date('Y-m-d') . '4u_telemetry_salt');
@@ -359,6 +360,18 @@ switch ($action) {
         $agentInfo = parseUserAgentInfo($ua);
         
         try {
+            if ($isHeartbeat) {
+                // Se for heartbeat, atualiza o timestamp do último registro do visitante se ocorrido nos últimos 15 min
+                $stmtLatest = $db->prepare("SELECT id FROM analytics_visits WHERE ip_hash = ? AND created_at >= ? ORDER BY created_at DESC LIMIT 1");
+                $stmtLatest->execute([$ipHash, time() - 900]);
+                $lastId = $stmtLatest->fetchColumn();
+                if ($lastId) {
+                    $upd = $db->prepare("UPDATE analytics_visits SET created_at = ? WHERE id = ?");
+                    $upd->execute([time(), $lastId]);
+                    jsonResponse(['success' => true, 'heartbeat' => true]);
+                    break;
+                }
+            }
             $ins = $db->prepare("INSERT INTO analytics_visits (page, referrer, referrer_domain, device, browser, ip_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $ins->execute([
                 $page,
@@ -471,7 +484,30 @@ switch ($action) {
         $dailyStmt->execute([$sevenDaysAgo]);
         $dailyVisits = $dailyStmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Usuários online agora (últimos 5 minutos = 300 segundos)
+        $fiveMinAgo = time() - 300;
+        $onlineStmt = $db->prepare("SELECT COUNT(DISTINCT ip_hash) FROM analytics_visits WHERE created_at >= ?");
+        $onlineStmt->execute([$fiveMinAgo]);
+        $onlineNow = (int)($onlineStmt->fetchColumn() ?: 0);
+
+        // Usuários nos últimos 15 minutos (janela estendida)
+        $fifteenMinAgo = time() - 900;
+        $online15Stmt = $db->prepare("SELECT COUNT(DISTINCT ip_hash) FROM analytics_visits WHERE created_at >= ?");
+        $online15Stmt->execute([$fifteenMinAgo]);
+        $onlineNow15m = (int)($online15Stmt->fetchColumn() ?: 0);
+
+        // Dispositivos dos usuários ativos nos últimos 15 minutos
+        $onlineDevStmt = $db->prepare("SELECT device, COUNT(DISTINCT ip_hash) as count FROM analytics_visits WHERE created_at >= ? GROUP BY device");
+        $onlineDevStmt->execute([$fifteenMinAgo]);
+        $onlineDevices = [];
+        foreach ($onlineDevStmt->fetchAll(PDO::FETCH_ASSOC) as $od) {
+            $onlineDevices[$od['device']] = (int)$od['count'];
+        }
+
         jsonResponse([
+            'online_now' => $onlineNow,
+            'online_now_15m' => $onlineNow15m,
+            'online_devices' => $onlineDevices,
             'total_visits' => $totalVisits,
             'unique_visitors' => $uniqueVisitors,
             'total_app_clicks' => $totalAppClicks,

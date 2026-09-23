@@ -1462,7 +1462,7 @@
         };
 
         // -------- Telemetria & Analytics --------
-        async function trackVisit() {
+        async function trackVisit(isHeartbeat = false) {
             try {
                 if (!API.track) return;
                 const currentPath = window.location.pathname + (window.location.hash || '');
@@ -1473,7 +1473,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         page: currentPath,
-                        referrer: ref
+                        referrer: ref,
+                        heartbeat: isHeartbeat ? 1 : 0
                     })
                 }).catch(() => {});
             } catch (e) {}
@@ -3085,8 +3086,8 @@
             if (!data) {
                 return `
                 <div class="grid gap-6">
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        ${[1, 2, 3, 4].map(() => `
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                        ${[1, 2, 3, 4, 5].map(() => `
                             <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 space-y-3 animate-pulse">
                                 <div class="w-1/3 h-4 bg-white/10 rounded"></div>
                                 <div class="w-2/3 h-8 bg-white/20 rounded"></div>
@@ -3102,6 +3103,9 @@
                 </div>`;
             }
 
+            const onlineNow = Number(data.online_now) || 0;
+            const onlineNow15m = Number(data.online_now_15m) || 0;
+            const onlineDevices = data.online_devices || {};
             const totalVisits = Number(data.total_visits) || 0;
             const uniqueVisitors = Number(data.unique_visitors) || 0;
             const totalClicks = Number(data.total_app_clicks) || 0;
@@ -3115,6 +3119,12 @@
 
             const devTotal = Object.values(devices).reduce((a, b) => a + Number(b), 0) || 1;
             const broTotal = Object.values(browsers).reduce((a, b) => a + Number(b), 0) || 1;
+
+            const onlineDevParts = [];
+            if (onlineDevices.Desktop) onlineDevParts.push(`${onlineDevices.Desktop} desktop`);
+            if (onlineDevices.Mobile) onlineDevParts.push(`${onlineDevices.Mobile} mobile`);
+            if (onlineDevices.Tablet) onlineDevParts.push(`${onlineDevices.Tablet} tablet`);
+            const devSummary = onlineDevParts.length ? onlineDevParts.join(', ') : 'no momento';
 
             const topAppsItems = topApps.length ? topApps.map((ta, idx) => {
                 const icon = ta.iconUrl || defaultIcon((ta.title || 'IA').slice(0, 2).toUpperCase(), 'emerald');
@@ -3268,10 +3278,35 @@
             return `
             <div class="grid gap-6">
                 <!-- KPI Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                    <!-- 1. Usuários Online Agora -->
+                    <div class="col-span-2 sm:col-span-1 glass border-gradient rounded-2xl bg-[#0a0c14]/80 p-4 sm:p-5 relative overflow-hidden group border-emerald-500/40 hover:border-emerald-400 transition-all shadow-lg shadow-emerald-500/10">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+                                </span>
+                                <span>Online Agora</span>
+                            </span>
+                            <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shrink-0">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-3 sm:mt-4 flex items-baseline gap-2">
+                            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">${onlineNow}</span>
+                            <span class="text-xs text-emerald-400 font-semibold">${onlineNow === 1 ? 'visitante ativo' : 'visitantes ativos'}</span>
+                        </div>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-400 truncate">
+                            ${onlineNow > 0 ? `🟢 Ativos: ${escapeHtml(devSummary)}` : (onlineNow15m > 0 ? `${onlineNow15m} nos últimos 15 min` : 'Aguardando visitas')}
+                        </p>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-emerald-500/15 rounded-full blur-xl group-hover:bg-emerald-500/25 transition-all"></div>
+                    </div>
+
+                    <!-- 2. Total de Visitas -->
                     <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Total de Visitas</span>
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Total Visitas</span>
                             <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
                             </div>
@@ -3280,28 +3315,30 @@
                             <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">${totalVisits.toLocaleString('pt-BR')}</span>
                             <span class="text-xs text-emerald-400 font-medium">sessões</span>
                         </div>
-                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Páginas visualizadas na vitrine</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Páginas na vitrine</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-all"></div>
                     </div>
 
+                    <!-- 3. Visitantes Únicos -->
                     <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-cyan-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Visitantes Únicos</span>
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Visitantes</span>
                             <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             </div>
                         </div>
                         <div class="mt-3 sm:mt-4 flex items-baseline gap-2">
                             <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">${uniqueVisitors.toLocaleString('pt-BR')}</span>
-                            <span class="text-xs text-cyan-400 font-medium">dispositivos</span>
+                            <span class="text-xs text-cyan-400 font-medium">únicos</span>
                         </div>
-                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">IPs anonimizados (LGPD)</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">IPs anonimizados</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
                     </div>
 
+                    <!-- 4. Cliques nos Apps -->
                     <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-amber-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Cliques nos Apps</span>
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Cliques Apps</span>
                             <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
                             </div>
@@ -3310,13 +3347,14 @@
                             <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-300">🔥 ${totalClicks.toLocaleString('pt-BR')}</span>
                             <span class="text-xs text-amber-400 font-medium">aberturas</span>
                         </div>
-                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Total de acessos a aplicativos</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Acessos a ferramentas</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-all"></div>
                     </div>
 
+                    <!-- 5. Taxa de Interação -->
                     <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-violet-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Taxa de Interação</span>
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Conversão</span>
                             <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                             </div>
@@ -3325,7 +3363,7 @@
                             <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">${convRate}%</span>
                             <span class="text-xs text-violet-400 font-medium">interação</span>
                         </div>
-                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Razão cliques / visualizações</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Cliques / visualizações</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-violet-500/5 rounded-full blur-xl group-hover:bg-violet-500/10 transition-all"></div>
                     </div>
                 </div>
@@ -3473,9 +3511,18 @@
                 <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <div class="flex items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-3">
                                 <h1 class="text-2xl font-bold tracking-tight gradient-text">Painel Administrativo</h1>
                                 <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/20">Central de Controle</span>
+                                ${state.admin.statsData ? `
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 text-xs font-semibold text-emerald-300 shadow-sm animate-pulse">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                                        </span>
+                                        <span>${Number(state.admin.statsData.online_now) || 0} online agora</span>
+                                    </span>
+                                ` : ''}
                             </div>
                             <p class="mt-1.5 text-sm text-zinc-400">
                                 ${hasBackend ? `Auto-save ativo no servidor (${API.backend.toUpperCase()}) • Telemetria e catálogo sincronizados` : `Modo offline - salve manualmente`}
@@ -3501,7 +3548,12 @@
                         <button id="tabBtnStats" class="tab-nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${currentTab === 'stats' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                             <span>Estatísticas & Tráfego</span>
-                            <span class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">NOVO</span>
+                            ${state.admin.statsData && Number(state.admin.statsData.online_now) > 0 ? `
+                                <span class="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold text-emerald-300 flex items-center gap-1">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                                    ${Number(state.admin.statsData.online_now)}
+                                </span>
+                            ` : `<span class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">NOVO</span>`}
                         </button>
                         <button id="tabBtnApps" class="tab-nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${currentTab === 'apps' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -3893,6 +3945,20 @@
         }
 
         function bindAdminHandlers() {
+            // Live Stats Auto-Refresh Timer (atualiza a cada 15s na aba stats)
+            if (window.adminStatsLiveTimer) {
+                clearInterval(window.adminStatsLiveTimer);
+                window.adminStatsLiveTimer = null;
+            }
+            if (state.admin.tab === 'stats') {
+                window.adminStatsLiveTimer = setInterval(async () => {
+                    if (!document.hidden && currentRoute() === 'admin' && state.admin.tab === 'stats' && !state.admin.statsLoading) {
+                        await fetchStats(true);
+                        renderAdmin();
+                    }
+                }, 15000);
+            }
+
             // Admin Tabs
             $('#tabBtnStats')?.addEventListener('click', () => { state.admin.tab = 'stats'; renderAdmin(); });
             $('#tabBtnApps')?.addEventListener('click', () => { state.admin.tab = 'apps'; renderAdmin(); });
@@ -3917,7 +3983,16 @@
                 });
             });
 
-            $('#logoutBtn')?.addEventListener('click', async () => { auth.logout(); toast('Você saiu.', 'info'); location.hash = '#/'; await render(); });
+            $('#logoutBtn')?.addEventListener('click', async () => {
+                if (window.adminStatsLiveTimer) {
+                    clearInterval(window.adminStatsLiveTimer);
+                    window.adminStatsLiveTimer = null;
+                }
+                auth.logout();
+                toast('Você saiu.', 'info');
+                location.hash = '#/';
+                await render();
+            });
             $('#reloadServerBtn')?.addEventListener('click', async () => await reloadFromServer(true));
             $('#downloadCatalogBtn')?.addEventListener('click', () => { downloadJson('catalog.json', catalogDraftPayload()); toast('JSON baixado!', 'ok'); });
             $('#newAppBtn')?.addEventListener('click', () => { state.admin.selectedId = null; renderAdmin(); $('#fTitle')?.focus(); });
@@ -4268,6 +4343,12 @@
             await new Promise(r => setTimeout(r, 100));
             await reloadFromServer(false);
             trackVisit();
+            // Heartbeat de presença do visitante (mantém contagem online ativa a cada 45 segundos sem inflar visitas)
+            setInterval(() => {
+                if (!document.hidden && currentRoute() === 'store') {
+                    trackVisit(true);
+                }
+            }, 45000);
         }
 
         $('#detailsClose')?.addEventListener('click', () => { $('#detailsDialog')?.close(); clearDetailsHash(); });
