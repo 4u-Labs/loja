@@ -17,3 +17,7 @@
 [2026-08-24 14:52:05] [INFO] [127.0.0.1] Nova sugestão/feedback recebido: [sugestao] PDF Pro
 [2026-08-24 15:02:57] [ERROR] [127.0.0.1] Ação inválida
 [2026-08-24 15:03:01] [ERROR] [127.0.0.1] ID do app não informado
+[2026-09-23 21:01:46] [ERROR] [127.0.0.1] Ação inválida
+[2026-09-23 21:01:46] [ERROR] [127.0.0.1] Não autorizado
+[2026-09-23 21:02:09] [ERROR] [127.0.0.1] Ação inválida
+[2026-09-23 21:02:09] [ERROR] [127.0.0.1] Ação inválida

@@ -927,7 +927,7 @@
 
         // -------- Config --------
         const BASE_URL = window.location.pathname.replace(/\/[^/]*$/, '');
-        let API = { catalog: '', upload: '', uploadBase64: '', status: '', login: '', verify: '', click: '', suggest: '', backend: 'unknown' };
+        let API = { catalog: '', upload: '', uploadBase64: '', status: '', login: '', verify: '', click: '', suggest: '', track: '', stats: '', backend: 'unknown' };
 
         // -------- Auth State --------
         const auth = {
@@ -1174,7 +1174,7 @@
         // -------- Backend Detection --------
         async function detectBackend() {
             console.log('🔍 Detectando backend...');
-            API = { catalog: '', upload: '', uploadBase64: '', status: '', login: '', verify: '', click: '', suggest: '', backend: 'unknown' };
+            API = { catalog: '', upload: '', uploadBase64: '', status: '', login: '', verify: '', click: '', suggest: '', track: '', stats: '', backend: 'unknown' };
 
             try {
                 const phpRes = await fetch('api.php?action=status', { method: 'GET', cache: 'no-store' });
@@ -1190,6 +1190,8 @@
                         verify: 'api.php?action=verify',
                         click: 'api.php?action=click',
                         suggest: 'api.php?action=suggest',
+                        track: 'api.php?action=track',
+                        stats: 'api.php?action=stats',
                         backend: 'php'
                     };
                     return 'php';
@@ -1212,6 +1214,8 @@
                         verify: '/api/verify',
                         click: '/api/click',
                         suggest: '/api/suggest',
+                        track: '/api/track',
+                        stats: '/api/stats',
                         backend: 'node'
                     };
                     return 'node';
@@ -1233,6 +1237,8 @@
                         verify: null,
                         click: null,
                         suggest: null,
+                        track: null,
+                        stats: null,
                         backend: 'static'
                     };
                     return 'static';
@@ -1316,7 +1322,52 @@
         }
 
         // -------- Global state --------
-        const state = { apps: [], prefs: { storeLogoUrl: '', heroAppId: '' }, store: { q: '', category: 'Todas', sortBy: 'destaque', pageSize: 18, visible: 18, loadingMore: false, favoritesOnly: false }, admin: { selectedId: null, listQ: '', categoryFilter: 'Todas' }, meta: { loaded: false, error: '', loadedAt: null, lastSaved: null, dirty: false, saving: false }, slider: { currentIndex: 0, autoplayTimer: null, autoplayInterval: 5000 } };
+        const state = { apps: [], prefs: { storeLogoUrl: '', heroAppId: '' }, store: { q: '', category: 'Todas', sortBy: 'destaque', pageSize: 18, visible: 18, loadingMore: false, favoritesOnly: false }, admin: { tab: 'stats', statsData: null, statsLoading: false, selectedId: null, listQ: '', categoryFilter: 'Todas' }, meta: { loaded: false, error: '', loadedAt: null, lastSaved: null, dirty: false, saving: false }, slider: { currentIndex: 0, autoplayTimer: null, autoplayInterval: 5000 } };
+
+        // -------- Telemetria & Analytics --------
+        async function trackVisit() {
+            try {
+                if (!API.track) return;
+                const currentPath = window.location.pathname + (window.location.hash || '');
+                if (currentPath.includes('/admin')) return;
+                const ref = document.referrer || '';
+                fetch(API.track, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        page: currentPath,
+                        referrer: ref
+                    })
+                }).catch(() => {});
+            } catch (e) {}
+        }
+
+        async function fetchStats(force = false) {
+            if (!API.stats) return null;
+            if (state.admin.statsData && !force) return state.admin.statsData;
+            state.admin.statsLoading = true;
+            try {
+                const res = await fetch(API.stats, {
+                    method: 'GET',
+                    headers: auth.getHeaders()
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    state.admin.statsData = data;
+                    return data;
+                } else if (res.status === 401) {
+                    auth.logout();
+                    showLoginDialog();
+                    return null;
+                }
+            } catch (e) {
+                console.error('Erro ao buscar estatísticas:', e);
+                toast('Erro ao buscar estatísticas: ' + e.message, 'err');
+            } finally {
+                state.admin.statsLoading = false;
+            }
+            return null;
+        }
         let autoSaveTimer = null; let searchDebounceTimer = null;
         function markDirtyAndSave() { state.meta.dirty = true; if (API.backend === 'static' || API.backend === 'none') return; if (autoSaveTimer) clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(async () => { if (state.meta.dirty && !state.meta.saving) { state.meta.saving = true; try { await saveCatalog(); } finally { state.meta.saving = false; } } }, 1000); }
         function getHeroApp() { const heroId = safeText(state.prefs.heroAppId); if (heroId) { const byId = state.apps.find(a => a.id === heroId); if (byId) return byId; } return sortApps(state.apps, 'destaque').find(a => a.status === 'Destaque') || null; }
@@ -1348,7 +1399,7 @@
         function getDetailsIdFromHash() { const h = location.hash || ''; const m = h.match(/^#\/app\/([^/?#]+)/); return m ? decodeURIComponent(m[1]) : null; }
         function clearDetailsHash() { if ((location.hash || '').startsWith('#/app/')) { history.replaceState(null, '', '#/'); } }
         function seoUrlFor(id) { const cleanId = safeText(id); const base = location.origin + (BASE_URL || ''); return base + '/app.php?id=' + encodeURIComponent(cleanId); }
-        window.addEventListener('hashchange', async () => await render());
+        window.addEventListener('hashchange', async () => { await render(); trackVisit(); });
 
         // -------- Login Functions --------
         function showLoginDialog() { const d = $('#loginDialog'); const form = $('#loginForm'); const passwordInput = $('#loginPassword'); const errorDiv = $('#loginError'); if (form) form.reset(); if (errorDiv) { errorDiv.classList.add('hidden'); errorDiv.textContent = ''; } if (d && !d.open) { d.showModal(); passwordInput?.focus(); } const newForm = form?.cloneNode(true); form?.parentNode?.replaceChild(newForm, form); newForm?.addEventListener('submit', async (e) => { e.preventDefault(); const passwordInput = newForm.querySelector('#loginPassword') || $('#loginPassword'); const password = passwordInput?.value || ''; const errorDiv = newForm.querySelector('#loginError') || $('#loginError'); const submitBtn = newForm.querySelector('#loginSubmit') || $('#loginSubmit'); if (!password) { if (errorDiv) { errorDiv.textContent = 'Digite a senha'; errorDiv.classList.remove('hidden'); } return; } if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Entrando...'; } try { const success = await doLogin(password); if (success) { d.close(); toast('Login realizado!', 'ok'); render(); } else { if (errorDiv) { errorDiv.textContent = 'Senha incorreta'; errorDiv.classList.remove('hidden'); } } } catch (err) { if (errorDiv) { errorDiv.textContent = 'Erro: ' + err.message; errorDiv.classList.remove('hidden'); } } finally { if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Entrar'; } } }); const cancelBtn = $('#loginCancel'); const newCancelBtn = cancelBtn?.cloneNode(true); cancelBtn?.parentNode?.replaceChild(newCancelBtn, cancelBtn); newCancelBtn?.addEventListener('click', () => { d.close(); location.hash = '#/'; }); }
@@ -2675,16 +2726,466 @@
             });
         }
 
+        // -------- Admin Statistics & Analytics View --------
+        function timeAgo(unixTimestamp) {
+            if (!unixTimestamp) return '';
+            const now = Math.floor(Date.now() / 1000);
+            const diff = Math.max(0, now - unixTimestamp);
+            if (diff < 60) return 'agora mesmo';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
+            return `${Math.floor(diff / 86400)}d atrás`;
+        }
+
+        function rankBadge(index) {
+            if (index === 0) return `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-amber-300 to-amber-500 text-xs font-black text-black shadow-md shadow-amber-500/20 shrink-0">1º</span>`;
+            if (index === 1) return `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-200 to-zinc-400 text-xs font-black text-black shadow-md shadow-zinc-400/20 shrink-0">2º</span>`;
+            if (index === 2) return `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-amber-700 to-amber-900 text-xs font-bold text-white shadow-md shadow-amber-800/20 shrink-0">3º</span>`;
+            return `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-zinc-400 shrink-0">${index + 1}º</span>`;
+        }
+
+        function getSourceBadge(source) {
+            const s = String(source || '').toLowerCase();
+            if (s.includes('google')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 text-xs font-medium text-blue-300"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Google Search</span>`;
+            }
+            if (s.includes('direto')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-zinc-500/10 border border-zinc-500/20 px-2.5 py-1 text-xs font-medium text-zinc-300">⚡ Acesso Direto / Favorito</span>`;
+            }
+            if (s.includes('whatsapp')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-medium text-emerald-300">💬 WhatsApp</span>`;
+            }
+            if (s.includes('instagram')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20 px-2.5 py-1 text-xs font-medium text-pink-300">📸 Instagram</span>`;
+            }
+            if (s.includes('portal') || s.includes('4u.ia.br')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 text-xs font-medium text-cyan-300">🌐 Portal 4U</span>`;
+            }
+            if (s.includes('app 4u')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20 px-2.5 py-1 text-xs font-medium text-teal-300">🚀 ${escapeHtml(source)}</span>`;
+            }
+            if (s.includes('github')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 text-xs font-medium text-purple-300">🐙 GitHub</span>`;
+            }
+            if (s.includes('twitter') || s.includes('x (')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 px-2.5 py-1 text-xs font-medium text-sky-300">🐦 X / Twitter</span>`;
+            }
+            if (s.includes('youtube')) {
+                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-xs font-medium text-red-300">▶️ YouTube</span>`;
+            }
+            return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-white/5 border border-white/10 px-2.5 py-1 text-xs font-medium text-zinc-300">🔗 ${escapeHtml(source || 'Acesso Direto')}</span>`;
+        }
+
+        function adminStatsView(data) {
+            if (!data) {
+                return `
+                <div class="grid gap-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${[1, 2, 3, 4].map(() => `
+                            <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 space-y-3 animate-pulse">
+                                <div class="w-1/3 h-4 bg-white/10 rounded"></div>
+                                <div class="w-2/3 h-8 bg-white/20 rounded"></div>
+                                <div class="w-1/2 h-3 bg-white/10 rounded"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-8 text-center text-zinc-400 flex flex-col items-center justify-center min-h-[300px]">
+                        <div class="h-10 w-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <div class="font-medium text-white">Carregando métricas e telemetria...</div>
+                        <div class="text-xs text-zinc-500 mt-1">Consultando visitas, origens e acessos aos apps</div>
+                    </div>
+                </div>`;
+            }
+
+            const totalVisits = Number(data.total_visits) || 0;
+            const uniqueVisitors = Number(data.unique_visitors) || 0;
+            const totalClicks = Number(data.total_app_clicks) || 0;
+            const convRate = data.conversion_rate || 0;
+            const topApps = data.top_apps || [];
+            const topReferrers = data.top_referrers || [];
+            const devices = data.devices || {};
+            const browsers = data.browsers || {};
+            const categoryClicks = data.category_clicks || [];
+            const recentVisits = data.recent_visits || [];
+
+            const devTotal = Object.values(devices).reduce((a, b) => a + Number(b), 0) || 1;
+            const broTotal = Object.values(browsers).reduce((a, b) => a + Number(b), 0) || 1;
+
+            const topAppsItems = topApps.length ? topApps.map((ta, idx) => {
+                const icon = ta.iconUrl || defaultIcon((ta.title || 'IA').slice(0, 2).toUpperCase(), 'emerald');
+                const clicks = Number(ta.clicks) || 0;
+                const maxClicks = Number(topApps[0]?.clicks) || 1;
+                const relativeBar = Math.min(100, Math.max(5, Math.round((clicks / maxClicks) * 100)));
+                return `
+                <div class="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3.5 hover:bg-white/[0.05] hover:border-white/10 transition-all">
+                    <div class="flex items-center gap-3 min-w-0">
+                        ${rankBadge(idx)}
+                        <img src="${escapeHtml(icon)}" alt="" class="h-11 w-11 rounded-xl object-cover ring-1 ring-white/10 shrink-0" />
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="truncate text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors">${escapeHtml(ta.title || 'Sem título')}</span>
+                                ${ta.category ? `<span class="hidden sm:inline-block rounded-md bg-white/5 px-2 py-0.5 text-[10px] text-zinc-400">${escapeHtml(ta.category)}</span>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <div class="w-24 sm:w-36 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                                    <div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-emerald-400" style="width: ${relativeBar}%"></div>
+                                </div>
+                                <span class="text-[11px] text-zinc-400 font-medium">${ta.percent}% dos cliques</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
+                        <div class="text-right">
+                            <div class="text-sm font-bold text-amber-300">🔥 ${clicks.toLocaleString('pt-BR')}</div>
+                            <div class="text-[10px] text-zinc-500 uppercase tracking-wider">acessos</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" class="quick-edit-app-btn rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-zinc-300 hover:bg-white/15 hover:text-white transition-all cursor-pointer" data-id="${escapeHtml(ta.id)}" title="Editar app no catálogo">
+                                Editar
+                            </button>
+                            ${ta.link ? `
+                                <a href="${escapeHtml(normalizeAppLink(ta.link))}" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all flex items-center gap-1" title="Abrir app em nova aba">
+                                    <span>Abrir</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('') : `<div class="p-6 text-center text-xs text-zinc-500">Nenhum clique registrado ainda</div>`;
+
+            const referrerItems = topReferrers.length ? topReferrers.map(tr => {
+                return `
+                <div class="rounded-xl border border-white/5 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-all">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="min-w-0 flex-1">
+                            ${getSourceBadge(tr.source)}
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-xs font-bold text-white">${Number(tr.count).toLocaleString('pt-BR')}</span>
+                            <span class="text-[11px] text-emerald-400 font-medium ml-1">(${tr.percent}%)</span>
+                        </div>
+                    </div>
+                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500" style="width: ${Math.min(100, Math.max(4, tr.percent))}%"></div>
+                    </div>
+                </div>`;
+            }).join('') : `<div class="p-6 text-center text-xs text-zinc-500">Nenhum dado de tráfego ainda</div>`;
+
+            const deviceItems = Object.entries(devices).map(([dev, count]) => {
+                const pct = Math.round((Number(count) / devTotal) * 100);
+                const icon = dev === 'Mobile' ? '📱' : dev === 'Tablet' ? '📟' : '💻';
+                const label = dev === 'Mobile' ? 'Celular / Mobile' : dev === 'Tablet' ? 'Tablet' : 'Computador / Desktop';
+                return `
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="flex items-center gap-1.5 text-zinc-300"><span>${icon}</span> ${label}</span>
+                        <span class="font-medium text-white">${count} (${pct}%)</span>
+                    </div>
+                    <div class="h-2 w-full overflow-hidden rounded-full bg-white/5">
+                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500" style="width: ${pct}%"></div>
+                    </div>
+                </div>`;
+            }).join('') || `<div class="text-xs text-zinc-500">Sem dados</div>`;
+
+            const browserItems = Object.entries(browsers).map(([bro, count]) => {
+                const pct = Math.round((Number(count) / broTotal) * 100);
+                return `
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-zinc-300 truncate">${escapeHtml(bro)}</span>
+                        <span class="font-medium text-white">${count} (${pct}%)</span>
+                    </div>
+                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                        <div class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" style="width: ${pct}%"></div>
+                    </div>
+                </div>`;
+            }).join('') || `<div class="text-xs text-zinc-500">Sem dados</div>`;
+
+            const categoryItems = categoryClicks.length ? categoryClicks.map(cat => {
+                return `
+                <div class="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-all">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="font-medium text-white truncate">${escapeHtml(cat.category)}</span>
+                            <span class="text-zinc-400 font-semibold">${cat.clicks} cliques <span class="text-zinc-500 font-normal">(${cat.percent}%)</span></span>
+                        </div>
+                        <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500" style="width: ${Math.min(100, Math.max(3, cat.percent))}%"></div>
+                        </div>
+                        <div class="text-[10px] text-zinc-500 mt-1">${cat.total_apps} apps nesta categoria</div>
+                    </div>
+                </div>`;
+            }).join('') : `<div class="p-4 text-center text-xs text-zinc-500">Nenhuma categoria</div>`;
+
+            const recentItems = recentVisits.length ? recentVisits.map(rv => {
+                const isAppClick = (rv.page || '').startsWith('Clique no App:');
+                const dotColor = isAppClick ? 'bg-amber-400' : 'bg-emerald-400';
+                return `
+                <div class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-all">
+                    <div class="mt-1 h-2 w-2 rounded-full ${dotColor} shrink-0 ring-4 ring-white/5"></div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-medium ${isAppClick ? 'text-amber-300' : 'text-zinc-200'} truncate">${escapeHtml(rv.page)}</span>
+                            <span class="text-[10px] text-zinc-500 shrink-0">${timeAgo(rv.created_at)}</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-zinc-400">
+                            <span class="rounded bg-white/5 px-1.5 py-0.5">${escapeHtml(rv.source || 'Direto')}</span>
+                            <span>•</span>
+                            <span>${escapeHtml(rv.device || 'Desktop')}</span>
+                            <span>•</span>
+                            <span class="truncate max-w-[120px]">${escapeHtml(rv.browser || 'Chrome')}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('') : `<div class="p-4 text-center text-xs text-zinc-500">Nenhuma atividade recente</div>`;
+
+            return `
+            <div class="grid gap-6">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Total de Visitas</span>
+                            <div class="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold tracking-tight text-white">${totalVisits.toLocaleString('pt-BR')}</span>
+                            <span class="text-xs text-emerald-400 font-medium">sessões</span>
+                        </div>
+                        <p class="mt-2 text-xs text-zinc-500">Páginas visualizadas na vitrine</p>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-all"></div>
+                    </div>
+
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-cyan-500/40 transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Visitantes Únicos</span>
+                            <div class="h-9 w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold tracking-tight text-white">${uniqueVisitors.toLocaleString('pt-BR')}</span>
+                            <span class="text-xs text-cyan-400 font-medium">dispositivos</span>
+                        </div>
+                        <p class="mt-2 text-xs text-zinc-500">IPs anonimizados (LGPD)</p>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
+                    </div>
+
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-amber-500/40 transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Cliques nos Apps</span>
+                            <div class="h-9 w-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold tracking-tight text-amber-300">🔥 ${totalClicks.toLocaleString('pt-BR')}</span>
+                            <span class="text-xs text-amber-400 font-medium">aberturas</span>
+                        </div>
+                        <p class="mt-2 text-xs text-zinc-500">Total de acessos a aplicativos</p>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-all"></div>
+                    </div>
+
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-violet-500/40 transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Taxa de Interação</span>
+                            <div class="h-9 w-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold tracking-tight text-white">${convRate}%</span>
+                            <span class="text-xs text-violet-400 font-medium">interação</span>
+                        </div>
+                        <p class="mt-2 text-xs text-zinc-500">Razão cliques / visualizações</p>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-violet-500/5 rounded-full blur-xl group-hover:bg-violet-500/10 transition-all"></div>
+                    </div>
+                </div>
+
+                <!-- 2-Column Grid -->
+                <div class="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+                    <!-- Left: Top Apps + Categories -->
+                    <div class="space-y-6">
+                        <!-- Top Apps -->
+                        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                        <span>🔥 Apps Mais Acessados</span>
+                                        <span class="rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300">Ranking Geral</span>
+                                    </h2>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Aplicativos com maior engajamento e cliques da vitrine</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2.5">
+                                ${topAppsItems}
+                            </div>
+                        </div>
+
+                        <!-- Categories Breakdown -->
+                        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 class="text-base font-semibold text-white">Desempenho por Categoria</h2>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Distribuição de interesse dos usuários por segmento</p>
+                                </div>
+                            </div>
+                            <div class="grid gap-2.5 sm:grid-cols-2">
+                                ${categoryItems}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Traffic Sources + Devices & Browsers + Activity Feed -->
+                    <div class="space-y-6">
+                        <!-- Traffic Sources -->
+                        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                        <span>🌐 Páginas de Origem</span>
+                                        <span class="rounded-full bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 text-xs font-semibold text-cyan-300">Referrers</span>
+                                    </h2>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Canais e sites de onde vêm os visitantes</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2.5">
+                                ${referrerItems}
+                            </div>
+                        </div>
+
+                        <!-- Devices & Browsers -->
+                        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5">
+                            <h2 class="text-base font-semibold text-white mb-4">Dispositivos & Navegadores</h2>
+                            <div class="grid gap-5 sm:grid-cols-2">
+                                <div class="space-y-3">
+                                    <div class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Aparelhos</div>
+                                    <div class="space-y-3">
+                                        ${deviceItems}
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Navegadores</div>
+                                    <div class="space-y-3">
+                                        ${browserItems}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Feed -->
+                        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span>Atividade em Tempo Real</span>
+                                    </h2>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Últimas visitas e eventos registrados</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                                ${recentItems}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
         // -------- Admin View --------
         function renderAdmin() {
+            if (state.admin.tab === 'stats' && !state.admin.statsData && !state.admin.statsLoading) {
+                fetchStats().then(() => renderAdmin());
+            }
+
+            const currentTab = state.admin.tab || 'stats';
             const categories = ['Todas', ...getCategories(state.apps)];
             const filtered = getAdminFilteredApps();
             const selected = state.apps.find(a => a.id === state.admin.selectedId) || null;
             const hasBackend = API.backend === 'node' || API.backend === 'php';
             const statusBadge = state.meta.saving ? `<span class="rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 ring-1 ring-amber-400/20 saving-indicator">Salvando...</span>` : hasBackend ? `<span class="rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300 ring-1 ring-emerald-400/20">✓ Sincronizado</span>` : `<span class="rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 ring-1 ring-amber-400/20">Offline</span>`;
             const right = ` ${statusBadge} <button id="reloadServerBtn" class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm hover:bg-white/10 transition-all cursor-pointer">Recarregar</button> ${!hasBackend ? `<button id="downloadCatalogBtn" class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer">Baixar JSON</button>` : ''} <button id="logoutBtn" class="rounded-xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer">Sair</button> `;
-            const main = ` <section class="grid gap-6"><div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6"><div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><h1 class="text-2xl font-bold tracking-tight gradient-text">Painel Admin</h1><p class="mt-2 text-sm text-zinc-400"> ${hasBackend ? `Auto-save ativo no servidor (${API.backend.toUpperCase()})` : `Modo offline - salve manualmente`} </p></div><button id="newAppBtn" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-3 text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine flex items-center gap-2 cursor-pointer">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Novo App </button></div></div> ${adminStoreSettings()} <div class="grid gap-6 lg:grid-cols-[1fr_1.3fr]"><div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 flex flex-col" style="height: 1050px;"><div class="flex flex-col gap-3 sm:flex-row sm:items-center mb-4 flex-shrink-0"> ${searchBox({ value: state.admin.listQ, id: 'adminListSearch', placeholder: 'Buscar apps...' })} ${categorySelect({ id: 'adminCategoryFilter', value: state.admin.categoryFilter, categories })} </div><div class="text-xs text-zinc-500 mb-3 flex-shrink-0"><span class="text-white font-medium">${filtered.length}</span> apps encontrados</div><div class="flex-1 overflow-y-auto overflow-x-hidden pr-1"> ${adminList(filtered)} </div></div><div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5"> ${adminEditor(selected)} </div></div></section> `;
+
+            let tabContent = '';
+            if (currentTab === 'stats') {
+                tabContent = adminStatsView(state.admin.statsData);
+            } else if (currentTab === 'settings') {
+                tabContent = adminStoreSettings();
+            } else {
+                tabContent = `
+                <div class="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 flex flex-col" style="height: 1050px;">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center mb-4 flex-shrink-0">
+                            ${searchBox({ value: state.admin.listQ, id: 'adminListSearch', placeholder: 'Buscar apps...' })}
+                            ${categorySelect({ id: 'adminCategoryFilter', value: state.admin.categoryFilter, categories })}
+                        </div>
+                        <div class="text-xs text-zinc-500 mb-3 flex-shrink-0">
+                            <span class="text-white font-medium">${filtered.length}</span> apps encontrados
+                        </div>
+                        <div class="flex-1 overflow-y-auto overflow-x-hidden pr-1">
+                            ${adminList(filtered)}
+                        </div>
+                    </div>
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5">
+                        ${adminEditor(selected)}
+                    </div>
+                </div>`;
+            }
+
+            const main = `
+            <section class="grid gap-6">
+                <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-6">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <div class="flex items-center gap-3">
+                                <h1 class="text-2xl font-bold tracking-tight gradient-text">Painel Administrativo</h1>
+                                <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/20">Central de Controle</span>
+                            </div>
+                            <p class="mt-1.5 text-sm text-zinc-400">
+                                ${hasBackend ? `Auto-save ativo no servidor (${API.backend.toUpperCase()}) • Telemetria e catálogo sincronizados` : `Modo offline - salve manualmente`}
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            ${currentTab === 'stats' ? `
+                                <button id="refreshStatsBtn" class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition-all flex items-center gap-2 cursor-pointer">
+                                    <svg class="${state.admin.statsLoading ? 'animate-spin' : ''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                    <span>Atualizar Estatísticas</span>
+                                </button>
+                            ` : ''}
+                            ${currentTab === 'apps' ? `
+                                <button id="newAppBtn" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                    <span>Novo App</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <!-- Navigation Tabs -->
+                    <div class="flex items-center gap-2 mt-6 border-t border-white/10 pt-4 overflow-x-auto">
+                        <button id="tabBtnStats" class="tab-nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${currentTab === 'stats' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                            <span>Estatísticas & Tráfego</span>
+                            <span class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">NOVO</span>
+                        </button>
+                        <button id="tabBtnApps" class="tab-nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${currentTab === 'apps' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            <span>Catálogo de Apps (${state.apps.length})</span>
+                        </button>
+                        <button id="tabBtnSettings" class="tab-nav-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${currentTab === 'settings' ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            <span>Configurações</span>
+                        </button>
+                    </div>
+                </div>
+                ${tabContent}
+            </section>`;
             $('#app').innerHTML = appShell({ title: 'Admin', subtitle: `Backend: ${API.backend}`, right, main });
             bindAdminHandlers();
         }
@@ -2914,6 +3415,30 @@
         }
 
         function bindAdminHandlers() {
+            // Admin Tabs
+            $('#tabBtnStats')?.addEventListener('click', () => { state.admin.tab = 'stats'; renderAdmin(); });
+            $('#tabBtnApps')?.addEventListener('click', () => { state.admin.tab = 'apps'; renderAdmin(); });
+            $('#tabBtnSettings')?.addEventListener('click', () => { state.admin.tab = 'settings'; renderAdmin(); });
+
+            // Refresh Stats Button
+            $('#refreshStatsBtn')?.addEventListener('click', async () => {
+                toast('Atualizando estatísticas...', 'info');
+                await fetchStats(true);
+                renderAdmin();
+                toast('Estatísticas atualizadas!', 'ok');
+            });
+
+            // Quick Edit from Stats Top Apps
+            $$('.quick-edit-app-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const id = btn.getAttribute('data-id');
+                    state.admin.tab = 'apps';
+                    state.admin.selectedId = id;
+                    renderAdmin();
+                });
+            });
+
             $('#logoutBtn')?.addEventListener('click', async () => { auth.logout(); toast('Você saiu.', 'info'); location.hash = '#/'; await render(); });
             $('#reloadServerBtn')?.addEventListener('click', async () => await reloadFromServer(true));
             $('#downloadCatalogBtn')?.addEventListener('click', () => { downloadJson('catalog.json', catalogDraftPayload()); toast('JSON baixado!', 'ok'); });
@@ -3205,6 +3730,7 @@
             if (backend === 'none') { state.meta.error = 'Nenhum backend disponível.'; await render(); return; }
             await new Promise(r => setTimeout(r, 100));
             await reloadFromServer(false);
+            trackVisit();
         }
 
         $('#detailsClose')?.addEventListener('click', () => { $('#detailsDialog')?.close(); clearDetailsHash(); });
