@@ -1,0 +1,19 @@
+[2026-03-09 20:11:02] [ERROR] [191.31.132.205] Muitas requisições. Aguarde 1s.
+[2026-03-09 20:12:02] [ERROR] [191.31.132.205] Muitas requisições. Aguarde.
+[2026-03-09 20:15:59] [INFO] [191.31.132.205] Migração de data/catalog.json concluída com sucesso.
+[2026-03-09 20:44:36] [ERROR] [191.31.132.205] Senha incorreta
+[2026-03-09 21:17:32] [ERROR] [191.31.132.205] Senha incorreta
+[2026-03-09 21:34:42] [ERROR] [191.31.132.205] Muitas requisições. Aguarde.
+[2026-03-09 21:34:47] [ERROR] [191.31.132.205] Muitas requisições. Aguarde.
+[2026-04-22 16:07:12] [ERROR] [191.249.91.12] Senha incorreta
+[2026-06-01 22:53:03] [ERROR] [191.31.224.248] Não autorizado
+[2026-06-01 23:42:53] [ERROR] [191.31.224.248] Não autorizado
+[2026-06-02 00:09:47] [ERROR] [191.31.224.248] Não autorizado
+[2026-06-02 00:09:53] [ERROR] [191.31.224.248] Não autorizado
+[2026-06-02 00:14:25] [ERROR] [191.31.224.248] Não autorizado
+[2026-06-09 03:46:17] [ERROR] [52.87.196.169] Nenhuma imagem enviada
+[2026-08-24 14:50:50] [ERROR] [] Por favor, preencha o nome do app ou uma descrição.
+[2026-08-24 14:51:21] [ERROR] [127.0.0.1] Por favor, preencha o nome do app ou uma descrição.
+[2026-08-24 14:52:05] [INFO] [127.0.0.1] Nova sugestão/feedback recebido: [sugestao] PDF Pro
+[2026-08-24 15:02:57] [ERROR] [127.0.0.1] Ação inválida
+[2026-08-24 15:03:01] [ERROR] [127.0.0.1] ID do app não informado
