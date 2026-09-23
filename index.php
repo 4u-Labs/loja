@@ -2744,36 +2744,32 @@
             return `<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-zinc-400 shrink-0">${index + 1}º</span>`;
         }
 
-        function getSourceBadge(source) {
+        function getSourceInfo(source) {
             const s = String(source || '').toLowerCase();
-            if (s.includes('google')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 text-xs font-medium text-blue-300"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Google Search</span>`;
+            if (s.includes('google')) return { icon: '🔍', name: 'Google Search', bg: 'bg-blue-500/15 text-blue-400' };
+            if (s.includes('direto')) return { icon: '⚡', name: 'Acesso Direto', bg: 'bg-zinc-500/15 text-zinc-300' };
+            if (s.includes('whatsapp') || s.includes('wa.me')) return { icon: '💬', name: 'WhatsApp', bg: 'bg-emerald-500/15 text-emerald-400' };
+            if (s.includes('instagram')) return { icon: '📸', name: 'Instagram', bg: 'bg-pink-500/15 text-pink-400' };
+            if (s.includes('portal') || s.includes('4u.ia.br')) return { icon: '🌐', name: 'Portal 4U', bg: 'bg-cyan-500/15 text-cyan-400' };
+            if (s.includes('app 4u')) return { icon: '🚀', name: source, bg: 'bg-teal-500/15 text-teal-400' };
+            if (s.includes('github')) return { icon: '🐙', name: 'GitHub', bg: 'bg-purple-500/15 text-purple-400' };
+            if (s.includes('twitter') || s.includes('x (')) return { icon: '🐦', name: 'X / Twitter', bg: 'bg-sky-500/15 text-sky-400' };
+            if (s.includes('youtube')) return { icon: '▶️', name: 'YouTube', bg: 'bg-red-500/15 text-red-400' };
+            if (s.includes('facebook')) return { icon: '👥', name: 'Facebook', bg: 'bg-blue-600/15 text-blue-400' };
+            if (s.includes('linkedin')) return { icon: '💼', name: 'LinkedIn', bg: 'bg-blue-700/15 text-blue-300' };
+            return { icon: '🔗', name: source || 'Acesso Direto', bg: 'bg-white/10 text-zinc-300' };
+        }
+
+        function formatEventTitle(page) {
+            if (!page) return 'Acesso à Vitrine';
+            if (page.startsWith('Clique no App:')) return page;
+            const clean = page.replace(/[#/?]/g, '');
+            if (clean === 'loja' || clean === '') return 'Acesso à Vitrine da Loja';
+            if (page.includes('/app/')) {
+                const m = page.match(/\/app\/([^/?#]+)/);
+                return m ? `App: ${m[1]}` : 'Visualizou Aplicativo';
             }
-            if (s.includes('direto')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-zinc-500/10 border border-zinc-500/20 px-2.5 py-1 text-xs font-medium text-zinc-300">⚡ Acesso Direto / Favorito</span>`;
-            }
-            if (s.includes('whatsapp')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-medium text-emerald-300">💬 WhatsApp</span>`;
-            }
-            if (s.includes('instagram')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20 px-2.5 py-1 text-xs font-medium text-pink-300">📸 Instagram</span>`;
-            }
-            if (s.includes('portal') || s.includes('4u.ia.br')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 text-xs font-medium text-cyan-300">🌐 Portal 4U</span>`;
-            }
-            if (s.includes('app 4u')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20 px-2.5 py-1 text-xs font-medium text-teal-300">🚀 ${escapeHtml(source)}</span>`;
-            }
-            if (s.includes('github')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 text-xs font-medium text-purple-300">🐙 GitHub</span>`;
-            }
-            if (s.includes('twitter') || s.includes('x (')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 px-2.5 py-1 text-xs font-medium text-sky-300">🐦 X / Twitter</span>`;
-            }
-            if (s.includes('youtube')) {
-                return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-red-500/10 border border-red-500/20 px-2.5 py-1 text-xs font-medium text-red-300">▶️ YouTube</span>`;
-            }
-            return `<span class="inline-flex items-center gap-1.5 rounded-lg bg-white/5 border border-white/10 px-2.5 py-1 text-xs font-medium text-zinc-300">🔗 ${escapeHtml(source || 'Acesso Direto')}</span>`;
+            return page;
         }
 
         function adminStatsView(data) {
@@ -2855,19 +2851,21 @@
             }).join('') : `<div class="p-6 text-center text-xs text-zinc-500">Nenhum clique registrado ainda</div>`;
 
             const referrerItems = topReferrers.length ? topReferrers.map(tr => {
+                const info = getSourceInfo(tr.source);
                 return `
-                <div class="rounded-xl border border-white/5 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-all">
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <div class="min-w-0 flex-1">
-                            ${getSourceBadge(tr.source)}
+                <div class="rounded-xl border border-white/5 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-all space-y-2">
+                    <div class="flex items-center justify-between gap-2 text-xs">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${info.bg} text-xs font-bold border border-white/5">${info.icon}</span>
+                            <span class="font-semibold text-zinc-200 truncate">${escapeHtml(info.name)}</span>
                         </div>
-                        <div class="text-right shrink-0">
-                            <span class="text-xs font-bold text-white">${Number(tr.count).toLocaleString('pt-BR')}</span>
-                            <span class="text-[11px] text-emerald-400 font-medium ml-1">(${tr.percent}%)</span>
+                        <div class="flex items-center gap-1.5 shrink-0 text-right">
+                            <span class="font-bold text-white text-xs">${Number(tr.count).toLocaleString('pt-BR')}</span>
+                            <span class="rounded bg-emerald-500/15 border border-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">${tr.percent}%</span>
                         </div>
                     </div>
                     <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500" style="width: ${Math.min(100, Math.max(4, tr.percent))}%"></div>
+                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400" style="width: ${Math.min(100, Math.max(4, tr.percent))}%"></div>
                     </div>
                 </div>`;
             }).join('') : `<div class="p-6 text-center text-xs text-zinc-500">Nenhum dado de tráfego ainda</div>`;
@@ -2878,23 +2876,37 @@
                 const label = dev === 'Mobile' ? 'Celular / Mobile' : dev === 'Tablet' ? 'Tablet' : 'Computador / Desktop';
                 return `
                 <div class="space-y-1.5">
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="flex items-center gap-1.5 text-zinc-300"><span>${icon}</span> ${label}</span>
-                        <span class="font-medium text-white">${count} (${pct}%)</span>
+                    <div class="flex items-center justify-between text-xs gap-2">
+                        <span class="flex items-center gap-2 text-zinc-300 font-medium truncate">
+                            <span class="text-sm shrink-0">${icon}</span>
+                            <span class="truncate">${label}</span>
+                        </span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="font-bold text-white">${count}</span>
+                            <span class="rounded bg-cyan-500/15 border border-cyan-500/20 px-1.5 py-0.5 text-[10px] font-bold text-cyan-300">${pct}%</span>
+                        </div>
                     </div>
-                    <div class="h-2 w-full overflow-hidden rounded-full bg-white/5">
-                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500" style="width: ${pct}%"></div>
+                    <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400" style="width: ${pct}%"></div>
                     </div>
                 </div>`;
             }).join('') || `<div class="text-xs text-zinc-500">Sem dados</div>`;
 
             const browserItems = Object.entries(browsers).map(([bro, count]) => {
                 const pct = Math.round((Number(count) / broTotal) * 100);
+                const broLower = bro.toLowerCase();
+                const icon = broLower.includes('chrome') ? '🌐' : broLower.includes('safari') ? '🧭' : broLower.includes('edge') ? '🌊' : broLower.includes('firefox') ? '🦊' : '💻';
                 return `
                 <div class="space-y-1.5">
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="text-zinc-300 truncate">${escapeHtml(bro)}</span>
-                        <span class="font-medium text-white">${count} (${pct}%)</span>
+                    <div class="flex items-center justify-between text-xs gap-2">
+                        <span class="flex items-center gap-2 text-zinc-300 font-medium truncate">
+                            <span class="text-sm shrink-0">${icon}</span>
+                            <span class="truncate">${escapeHtml(bro)}</span>
+                        </span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="font-bold text-white">${count}</span>
+                            <span class="rounded bg-blue-500/15 border border-blue-500/20 px-1.5 py-0.5 text-[10px] font-bold text-blue-300">${pct}%</span>
+                        </div>
                     </div>
                     <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
                         <div class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" style="width: ${pct}%"></div>
@@ -2920,22 +2932,26 @@
 
             const recentItems = recentVisits.length ? recentVisits.map(rv => {
                 const isAppClick = (rv.page || '').startsWith('Clique no App:');
-                const dotColor = isAppClick ? 'bg-amber-400' : 'bg-emerald-400';
+                const dotColor = isAppClick ? 'bg-amber-400 ring-amber-400/20' : 'bg-emerald-400 ring-emerald-400/20';
+                const title = formatEventTitle(rv.page);
+                const sourceInfo = getSourceInfo(rv.source);
                 return `
-                <div class="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-all">
-                    <div class="mt-1 h-2 w-2 rounded-full ${dotColor} shrink-0 ring-4 ring-white/5"></div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-xs font-medium ${isAppClick ? 'text-amber-300' : 'text-zinc-200'} truncate">${escapeHtml(rv.page)}</span>
-                            <span class="text-[10px] text-zinc-500 shrink-0">${timeAgo(rv.created_at)}</span>
+                <div class="rounded-xl border border-white/5 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-all space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="relative flex h-2 w-2 shrink-0">
+                                <span class="inline-flex rounded-full h-2 w-2 ${dotColor} ring-4"></span>
+                            </span>
+                            <span class="text-xs font-semibold ${isAppClick ? 'text-amber-300' : 'text-zinc-100'} truncate">
+                                ${escapeHtml(title)}
+                            </span>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-zinc-400">
-                            <span class="rounded bg-white/5 px-1.5 py-0.5">${escapeHtml(rv.source || 'Direto')}</span>
-                            <span>•</span>
-                            <span>${escapeHtml(rv.device || 'Desktop')}</span>
-                            <span>•</span>
-                            <span class="truncate max-w-[120px]">${escapeHtml(rv.browser || 'Chrome')}</span>
-                        </div>
+                        <span class="text-[10px] text-zinc-500 shrink-0 font-medium">${timeAgo(rv.created_at)}</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 text-[11px] text-zinc-400 pl-4">
+                        <span class="rounded bg-white/5 px-1.5 py-0.5 text-zinc-300 font-medium">${sourceInfo.icon} ${escapeHtml(sourceInfo.name)}</span>
+                        <span class="rounded bg-white/5 px-1.5 py-0.5 text-zinc-400">${escapeHtml(rv.device || 'Desktop')}</span>
+                        <span class="rounded bg-white/5 px-1.5 py-0.5 text-zinc-400 truncate max-w-[120px]">${escapeHtml(rv.browser || 'Chrome')}</span>
                     </div>
                 </div>`;
             }).join('') : `<div class="p-4 text-center text-xs text-zinc-500">Nenhuma atividade recente</div>`;
@@ -2943,70 +2959,70 @@
             return `
             <div class="grid gap-6">
                 <!-- KPI Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Total de Visitas</span>
-                            <div class="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Total de Visitas</span>
+                            <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
                             </div>
                         </div>
-                        <div class="mt-4 flex items-baseline gap-2">
-                            <span class="text-3xl font-extrabold tracking-tight text-white">${totalVisits.toLocaleString('pt-BR')}</span>
+                        <div class="mt-3 sm:mt-4 flex items-baseline gap-2">
+                            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">${totalVisits.toLocaleString('pt-BR')}</span>
                             <span class="text-xs text-emerald-400 font-medium">sessões</span>
                         </div>
-                        <p class="mt-2 text-xs text-zinc-500">Páginas visualizadas na vitrine</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Páginas visualizadas na vitrine</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-all"></div>
                     </div>
 
-                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-cyan-500/40 transition-all">
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-cyan-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Visitantes Únicos</span>
-                            <div class="h-9 w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Visitantes Únicos</span>
+                            <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             </div>
                         </div>
-                        <div class="mt-4 flex items-baseline gap-2">
-                            <span class="text-3xl font-extrabold tracking-tight text-white">${uniqueVisitors.toLocaleString('pt-BR')}</span>
+                        <div class="mt-3 sm:mt-4 flex items-baseline gap-2">
+                            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">${uniqueVisitors.toLocaleString('pt-BR')}</span>
                             <span class="text-xs text-cyan-400 font-medium">dispositivos</span>
                         </div>
-                        <p class="mt-2 text-xs text-zinc-500">IPs anonimizados (LGPD)</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">IPs anonimizados (LGPD)</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-all"></div>
                     </div>
 
-                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-amber-500/40 transition-all">
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-amber-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Cliques nos Apps</span>
-                            <div class="h-9 w-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Cliques nos Apps</span>
+                            <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
                             </div>
                         </div>
-                        <div class="mt-4 flex items-baseline gap-2">
-                            <span class="text-3xl font-extrabold tracking-tight text-amber-300">🔥 ${totalClicks.toLocaleString('pt-BR')}</span>
+                        <div class="mt-3 sm:mt-4 flex items-baseline gap-2">
+                            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-300">🔥 ${totalClicks.toLocaleString('pt-BR')}</span>
                             <span class="text-xs text-amber-400 font-medium">aberturas</span>
                         </div>
-                        <p class="mt-2 text-xs text-zinc-500">Total de acessos a aplicativos</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Total de acessos a aplicativos</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-all"></div>
                     </div>
 
-                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-5 relative overflow-hidden group hover:border-violet-500/40 transition-all">
+                    <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/70 p-4 sm:p-5 relative overflow-hidden group hover:border-violet-500/40 transition-all">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Taxa de Interação</span>
-                            <div class="h-9 w-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                            <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Taxa de Interação</span>
+                            <div class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 shrink-0">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                             </div>
                         </div>
-                        <div class="mt-4 flex items-baseline gap-2">
-                            <span class="text-3xl font-extrabold tracking-tight text-white">${convRate}%</span>
+                        <div class="mt-3 sm:mt-4 flex items-baseline gap-2">
+                            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">${convRate}%</span>
                             <span class="text-xs text-violet-400 font-medium">interação</span>
                         </div>
-                        <p class="mt-2 text-xs text-zinc-500">Razão cliques / visualizações</p>
+                        <p class="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-zinc-500">Razão cliques / visualizações</p>
                         <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-violet-500/5 rounded-full blur-xl group-hover:bg-violet-500/10 transition-all"></div>
                     </div>
                 </div>
 
                 <!-- 2-Column Grid -->
-                <div class="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+                <div class="grid gap-6 lg:grid-cols-[1.25fr_1fr]">
                     <!-- Left: Top Apps + Categories -->
                     <div class="space-y-6">
                         <!-- Top Apps -->
@@ -3058,20 +3074,21 @@
                         </div>
 
                         <!-- Devices & Browsers -->
-                        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5">
-                            <h2 class="text-base font-semibold text-white mb-4">Dispositivos & Navegadores</h2>
-                            <div class="grid gap-5 sm:grid-cols-2">
-                                <div class="space-y-3">
-                                    <div class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Aparelhos</div>
-                                    <div class="space-y-3">
-                                        ${deviceItems}
-                                    </div>
+                        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 space-y-4">
+                            <div>
+                                <h2 class="text-base font-semibold text-white">Dispositivos & Navegadores</h2>
+                                <p class="text-xs text-zinc-400 mt-0.5">Distribuição de plataformas e browsers</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Aparelhos</div>
+                                <div class="space-y-2.5">
+                                    ${deviceItems}
                                 </div>
-                                <div class="space-y-3">
-                                    <div class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Navegadores</div>
-                                    <div class="space-y-3">
-                                        ${browserItems}
-                                    </div>
+                            </div>
+                            <div class="border-t border-white/5 pt-3">
+                                <div class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 mb-2.5">Navegadores</div>
+                                <div class="space-y-2.5">
+                                    ${browserItems}
                                 </div>
                             </div>
                         </div>
