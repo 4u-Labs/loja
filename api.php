@@ -20,7 +20,7 @@ function loadEnv($path) {
 }
 loadEnv(__DIR__ . '/.env');
 
-define('ADMIN_PASSWORD', $_ENV['ADMIN_PASSWORD'] ?? 'Fbr4g4@'); 
+define('ADMIN_PASSWORD', $_ENV['ADMIN_PASSWORD'] ?? ''); 
 define('TOKEN_SECRET', '4u_ia_br_' . hash('sha256', ADMIN_PASSWORD . 'salt_premium_2026'));
 define('TOKEN_EXPIRY', 86400); 
 
