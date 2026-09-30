@@ -1577,7 +1577,105 @@
         function sliderNext() { const featuredApps = getFeaturedApps(); if (featuredApps.length <= 1) return; state.slider.currentIndex = (state.slider.currentIndex + 1) % featuredApps.length; updateSliderUI(); }
         function sliderPrev() { const featuredApps = getFeaturedApps(); if (featuredApps.length <= 1) return; state.slider.currentIndex = (state.slider.currentIndex - 1 + featuredApps.length) % featuredApps.length; updateSliderUI(); }
         function sliderGoTo(index) { const featuredApps = getFeaturedApps(); if (index < 0 || index >= featuredApps.length) return; state.slider.currentIndex = index; updateSliderUI(); startSliderAutoplay(); }
-        function updateSliderUI() { const featuredApps = getFeaturedApps(); if (featuredApps.length === 0) return; const app = featuredApps[state.slider.currentIndex]; if (!app) return; const icon = app.iconUrl || defaultIcon((app.title || 'IA').slice(0, 2).toUpperCase(), statusTone(app.status)); const heroImg = safeText(app.heroImageUrl); const tags = (app.tags || []).slice(0, 5); const slideContent = $('#sliderContent'); if (slideContent) { slideContent.style.opacity = '0'; slideContent.style.transform = 'translateX(20px)'; setTimeout(() => { const heroImgEl = $('#sliderHeroImage'); const heroPlaceholder = $('#sliderHeroPlaceholder'); if (heroImgEl && heroPlaceholder) { if (heroImg) { heroImgEl.src = heroImg; heroImgEl.classList.remove('hidden'); heroPlaceholder.classList.add('hidden'); } else { heroImgEl.classList.add('hidden'); heroPlaceholder.classList.remove('hidden'); } } const iconEl = $('#sliderIcon'); if (iconEl) iconEl.src = icon; const titleEl = $('#sliderTitle'); if (titleEl) titleEl.textContent = app.title || 'Sem título'; const categoryEl = $('#sliderCategory'); if (categoryEl) categoryEl.textContent = app.category || 'App'; const descEl = $('#sliderDescription'); if (descEl) descEl.textContent = app.shortDescription || ''; const tagsEl = $('#sliderTags'); if (tagsEl) { tagsEl.innerHTML = tags.map(t => `<span class="rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-200 ring-1 ring-white/10">#${escapeHtml(t)}</span>`).join(''); } const openAppBtn = $('#sliderOpenApp'); const detailsBtn = $('#sliderDetails'); if (openAppBtn) openAppBtn.setAttribute('data-id', app.id); if (detailsBtn) detailsBtn.setAttribute('data-id', app.id); const statusEl = $('#sliderStatus'); if (statusEl) statusEl.innerHTML = app.status ? statusPill(app.status) : ''; slideContent.style.opacity = '1'; slideContent.style.transform = 'translateX(0)'; }, 150); } $$('.slider-dot').forEach((dot, i) => { if (i === state.slider.currentIndex) { dot.classList.add('bg-white', 'w-6'); dot.classList.remove('bg-white/30', 'w-2'); } else { dot.classList.remove('bg-white', 'w-6'); dot.classList.add('bg-white/30', 'w-2'); } }); const counterEl = $('#sliderCounter'); if (counterEl) counterEl.textContent = `${state.slider.currentIndex + 1} / ${featuredApps.length}`; const progressBar = $('#sliderProgress'); if (progressBar) { progressBar.style.animation = 'none'; progressBar.offsetHeight; progressBar.style.animation = 'sliderProgress 5s linear infinite'; } }
+        function applyHeroFitMode(mode) {
+            const isContain = mode === 'contain';
+            const heroImgEl = $('#sliderHeroImage');
+            const heroBackdropEl = $('#sliderHeroBackdrop');
+            const label = $('#heroFitLabel');
+            if (heroImgEl) {
+                if (isContain) {
+                    heroImgEl.className = 'relative z-10 max-h-full max-w-full object-contain mx-auto transition-all duration-500 pointer-events-none ' + (heroImgEl.src ? '' : 'hidden');
+                } else {
+                    heroImgEl.className = 'absolute inset-0 h-full w-full object-cover transition-all duration-500 pointer-events-none ' + (heroImgEl.src ? '' : 'hidden');
+                }
+            }
+            if (heroBackdropEl) {
+                if (isContain && heroImgEl && heroImgEl.src && !heroImgEl.classList.contains('hidden')) {
+                    heroBackdropEl.classList.remove('hidden');
+                } else {
+                    heroBackdropEl.classList.add('hidden');
+                }
+            }
+            if (label) {
+                label.textContent = isContain ? 'Auto-Ajuste: Sem Cortes' : 'Preenchimento';
+            }
+        }
+
+        function updateSliderUI() {
+            const featuredApps = getFeaturedApps();
+            if (featuredApps.length === 0) return;
+            const app = featuredApps[state.slider.currentIndex];
+            if (!app) return;
+            const icon = app.iconUrl || defaultIcon((app.title || 'IA').slice(0, 2).toUpperCase(), statusTone(app.status));
+            const heroImg = safeText(app.heroImageUrl);
+            const tags = (app.tags || []).slice(0, 5);
+            const isContain = (localStorage.getItem('hero_fit_mode') || 'contain') === 'contain';
+            const slideContent = $('#sliderContent');
+            if (slideContent) {
+                slideContent.style.opacity = '0';
+                slideContent.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    const heroImgEl = $('#sliderHeroImage');
+                    const heroBackdropEl = $('#sliderHeroBackdrop');
+                    const heroPlaceholder = $('#sliderHeroPlaceholder');
+                    if (heroImgEl && heroPlaceholder) {
+                        if (heroImg) {
+                            heroImgEl.src = heroImg;
+                            heroImgEl.classList.remove('hidden');
+                            if (heroBackdropEl) {
+                                heroBackdropEl.src = heroImg;
+                                if (isContain) heroBackdropEl.classList.remove('hidden');
+                                else heroBackdropEl.classList.add('hidden');
+                            }
+                            heroPlaceholder.classList.add('hidden');
+                        } else {
+                            heroImgEl.classList.add('hidden');
+                            if (heroBackdropEl) heroBackdropEl.classList.add('hidden');
+                            heroPlaceholder.classList.remove('hidden');
+                        }
+                    }
+                    const iconEl = $('#sliderIcon');
+                    if (iconEl) iconEl.src = icon;
+                    const titleEl = $('#sliderTitle');
+                    if (titleEl) titleEl.textContent = app.title || 'Sem título';
+                    const categoryEl = $('#sliderCategory');
+                    if (categoryEl) categoryEl.textContent = app.category || 'App';
+                    const descEl = $('#sliderDescription');
+                    if (descEl) descEl.textContent = app.shortDescription || '';
+                    const tagsEl = $('#sliderTags');
+                    if (tagsEl) {
+                        tagsEl.innerHTML = tags.map(t => `<span class="text-[11px] text-zinc-400">#${escapeHtml(t)}</span>`).join('');
+                    }
+                    const openAppBtn = $('#sliderOpenApp');
+                    const detailsBtn = $('#sliderDetails');
+                    const iframeBtn = $('#sliderContent .open-iframe');
+                    if (openAppBtn) openAppBtn.setAttribute('data-id', app.id);
+                    if (detailsBtn) detailsBtn.setAttribute('data-id', app.id);
+                    if (iframeBtn) iframeBtn.setAttribute('data-id', app.id);
+                    const statusEl = $('#sliderStatus');
+                    if (statusEl) statusEl.innerHTML = app.status ? statusPill(app.status) : '';
+                    slideContent.style.opacity = '1';
+                    slideContent.style.transform = 'translateX(0)';
+                }, 150);
+            }
+            $$('.slider-dot').forEach((dot, i) => {
+                if (i === state.slider.currentIndex) {
+                    dot.classList.add('bg-white', 'w-6');
+                    dot.classList.remove('bg-white/30', 'w-2');
+                } else {
+                    dot.classList.remove('bg-white', 'w-6');
+                    dot.classList.add('bg-white/30', 'w-2');
+                }
+            });
+            const counterEl = $('#sliderCounter');
+            if (counterEl) counterEl.textContent = `${state.slider.currentIndex + 1} / ${featuredApps.length}`;
+            const progressBar = $('#sliderProgress');
+            if (progressBar) {
+                progressBar.style.animation = 'none';
+                progressBar.offsetHeight;
+                progressBar.style.animation = 'sliderProgress 5s linear infinite';
+            }
+        }
 
         // -------- Router --------
         function currentRoute() { const h = location.hash || '#/'; if (h.startsWith('#/admin')) return 'admin'; return 'store'; }
@@ -2210,6 +2308,7 @@
             const featuredApps = getFeaturedApps();
             if (state.slider.currentIndex >= featuredApps.length) { state.slider.currentIndex = 0; }
             const showAdmin = localStorage.getItem('4uia_dev_mode') === 'true';
+            const isContain = (localStorage.getItem('hero_fit_mode') || 'contain') === 'contain';
             if (featuredApps.length === 0) {
                 return `
                 <div class="border-gradient-animated rounded-3xl bg-[#0a0c14] p-8 sm:p-10 relative overflow-hidden">
@@ -2238,77 +2337,85 @@
             return `
             <div class="border-gradient-animated rounded-3xl bg-[#0a0c14] overflow-hidden relative group cyber-corner" id="heroSlider">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(16,185,129,0.12),transparent)]"></div>
-                <div class="relative p-6 sm:p-8">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="flex items-center gap-3">
-                            <span class="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-1.5 text-xs font-semibold text-white glow-sm">✨ Super Destaque</span>
+                <div class="relative p-4 sm:p-8">
+                    <div class="flex flex-wrap items-center justify-between gap-2.5 mb-4 sm:mb-5">
+                        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                            <span class="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-1 sm:py-1.5 text-xs font-semibold text-white glow-sm">✨ Super Destaque</span>
                             <span id="sliderStatus">${hero.status ? statusPill(hero.status) : ''}</span>
                             ${clicks > 0 ? `<span class="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/20">🔥 ${clicks} acessos</span>` : ''}
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 sm:gap-3 ml-auto">
+                            <button type="button" id="toggleHeroFitBtn" class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all cursor-pointer shadow-sm" title="Alternar entre Auto-Ajuste (sem cortes) e Preenchimento total">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                <span id="heroFitLabel" class="pointer-events-none">${isContain ? 'Auto-Ajuste: Sem Cortes' : 'Preenchimento'}</span>
+                            </button>
                             ${hasMultipleSlides ? `<span id="sliderCounter" class="text-xs text-zinc-400 font-medium">${state.slider.currentIndex + 1} / ${featuredApps.length}</span>` : ''}
-                            <div class="text-xs text-zinc-500">${shown} de ${total} apps</div>
+                            <div class="text-xs text-zinc-500 hidden sm:block">${shown} de ${total} apps</div>
                         </div>
                     </div>
-                    <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5 card-shine relative">
+                    <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5 card-shine relative group/slider">
                         <div class="hero-glass-sweep"></div>
                         ${hasMultipleSlides ? `
-                            <button type="button" id="sliderPrev" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/70 hover:border-white/40 transition-all opacity-0 group-hover:opacity-100 cursor-pointer">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <button type="button" id="sliderPrev" class="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 h-11 w-11 rounded-full bg-black/60 backdrop-blur-md border border-white/20 items-center justify-center text-white hover:bg-black/80 transition-all opacity-0 group-hover/slider:opacity-100 cursor-pointer shadow-xl">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </button>
-                            <button type="button" id="sliderNext" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/70 hover:border-white/40 transition-all opacity-0 group-hover:opacity-100 cursor-pointer">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <button type="button" id="sliderNext" class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 h-11 w-11 rounded-full bg-black/60 backdrop-blur-md border border-white/20 items-center justify-center text-white hover:bg-black/80 transition-all opacity-0 group-hover/slider:opacity-100 cursor-pointer shadow-xl">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </button>
                         ` : ''}
-                        <div id="sliderContent" class="relative aspect-[21/9] w-full transition-all duration-300 ease-out z-10">
-                            <img id="sliderHeroImage" alt="" src="${escapeHtml(heroImg)}" class="absolute inset-0 h-full w-full object-cover ${heroImg ? '' : 'hidden'}" />
+                        <div id="sliderContent" class="relative aspect-[4/3] xs:aspect-[16/10] sm:aspect-[21/9] min-h-[340px] sm:min-h-[460px] w-full transition-all duration-300 ease-out z-10 overflow-hidden flex items-center justify-center bg-[#06080c]">
+                            <img id="sliderHeroBackdrop" alt="" src="${escapeHtml(heroImg)}" class="absolute inset-0 h-full w-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none transition-all duration-500 ${heroImg && isContain ? '' : 'hidden'}" />
+                            <img id="sliderHeroImage" alt="" src="${escapeHtml(heroImg)}" class="relative z-10 max-h-full max-w-full ${isContain ? 'object-contain mx-auto' : 'absolute inset-0 h-full w-full object-cover'} transition-all duration-500 pointer-events-none ${heroImg ? '' : 'hidden'}" />
                             <div id="sliderHeroPlaceholder" class="absolute inset-0 ${heroImg ? 'hidden' : ''}">
                                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-cyan-500/10 to-teal-500/20"></div>
                                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(16,185,129,0.3),transparent)]"></div>
                             </div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#050709] via-[#050709]/50 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                                <div class="flex items-end gap-5">
-                                    <img id="sliderIcon" alt="" src="${escapeHtml(icon)}" class="h-20 w-20 rounded-2xl object-cover ring-2 ring-white/20 app-icon-squircle float" />
-                                    <div class="min-w-0 flex-1 mb-1">
-                                        <div class="flex flex-wrap items-center gap-3 mb-2">
-                                            <h1 id="sliderTitle" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">${escapeHtml(hero.title || 'Sem título')}</h1>
-                                            <span id="sliderCategory" class="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-zinc-300">${escapeHtml(hero.category || 'App')}</span>
+                            <div class="absolute inset-0 z-10 bg-gradient-to-t from-[#050709]/95 via-[#050709]/30 to-transparent pointer-events-none"></div>
+                            <div id="sliderDock" class="absolute bottom-0 left-0 right-0 p-3 sm:p-6 z-20 transition-all duration-300">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 backdrop-blur-md bg-black/60 p-3.5 sm:p-4 rounded-2xl border border-white/10 shadow-2xl">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <img id="sliderIcon" alt="" src="${escapeHtml(icon)}" class="h-11 w-11 sm:h-14 sm:w-14 rounded-2xl object-cover ring-1 ring-white/20 app-icon-squircle shadow-lg shrink-0" />
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-2 mb-0.5">
+                                                <h2 id="sliderTitle" class="text-base sm:text-lg font-bold tracking-tight text-white truncate">${escapeHtml(hero.title || 'Sem título')}</h2>
+                                                <span id="sliderCategory" class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-semibold shrink-0">${escapeHtml(hero.category || 'App')}</span>
+                                            </div>
+                                            <p id="sliderDescription" class="text-xs text-zinc-300 line-clamp-1">${escapeHtml(hero.shortDescription || '')}</p>
+                                            <div id="sliderTags" class="flex flex-wrap gap-1.5 mt-1">
+                                                ${tags.map(t => `<span class="text-[11px] text-zinc-400">#${escapeHtml(t)}</span>`).join('')}
+                                            </div>
                                         </div>
-                                        <p id="sliderDescription" class="text-zinc-300 line-clamp-2 max-w-2xl">${escapeHtml(hero.shortDescription || '')}</p>
                                     </div>
-                                </div>
-                                <div id="sliderTags" class="mt-5 flex flex-wrap gap-2">
-                                    ${tags.map(t => `<span class="rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-200 ring-1 ring-white/10">#${escapeHtml(t)}</span>`).join('')}
-                                </div>
-                                <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <div class="flex flex-wrap gap-3">
-                                        <button type="button" class="open-iframe inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-lg shadow-emerald-500/25" data-id="${escapeHtml(hero.id)}">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <button type="button" class="open-iframe flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer" data-id="${escapeHtml(hero.id)}">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                                             <span class="pointer-events-none">Testar no Modal</span>
                                         </button>
-                                        <button type="button" id="sliderOpenApp" class="open-app inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer" data-id="${escapeHtml(hero.id)}">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                        <button type="button" id="sliderOpenApp" class="open-app inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer" data-id="${escapeHtml(hero.id)}">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                                             <span class="pointer-events-none">Nova Aba</span>
                                         </button>
-                                        <button type="button" id="sliderDetails" class="open-details rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-medium text-white hover:bg-white/10 transition-all cursor-pointer" data-id="${escapeHtml(hero.id)}">
+                                        <button type="button" id="sliderDetails" class="open-details rounded-xl border border-white/20 bg-white/10 px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white hover:bg-white/20 transition-all cursor-pointer" data-id="${escapeHtml(hero.id)}">
                                             <span class="pointer-events-none">Detalhes</span>
                                         </button>
+                                        <button type="button" id="sliderToggleDock" class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/15 p-2 sm:p-2.5 text-zinc-400 hover:text-white transition-all cursor-pointer" title="Ocultar/Exibir painel para ver banner completo">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
                                     </div>
-                                    ${hasMultipleSlides ? `
-                                        <div class="flex items-center gap-2">
-                                            ${featuredApps.map((_, i) => `
-                                                <button type="button" class="slider-dot h-2 ${i === state.slider.currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/30'} rounded-full transition-all duration-300 cursor-pointer hover:bg-white/60" data-index="${i}"></button>
-                                            `).join('')}
-                                        </div>
-                                    ` : ''}
                                 </div>
                             </div>
                         </div>
                     </div>
                     ${hasMultipleSlides ? `
-                        <div class="mt-4 h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div id="sliderProgress" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full slider-progress-animation" style="width: 0%"></div>
+                        <div class="mt-4 flex items-center gap-3">
+                            <div class="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div id="sliderProgress" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full slider-progress-animation" style="width: 0%"></div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                ${featuredApps.map((_, i) => `
+                                    <button type="button" class="slider-dot h-2 ${i === state.slider.currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/30'} rounded-full transition-all duration-300 cursor-pointer hover:bg-white/60" data-index="${i}"></button>
+                                `).join('')}
+                            </div>
                         </div>
                     ` : ''}
                 </div>
@@ -2662,6 +2769,29 @@
             if (sliderNextBtn) { sliderNextBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); sliderNext(); startSliderAutoplay(); }); }
             $$('.slider-dot').forEach(dot => { dot.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const index = parseInt(dot.getAttribute('data-index'), 10); if (!isNaN(index)) sliderGoTo(index); }); });
             if (heroSlider) { heroSlider.addEventListener('mouseenter', () => { stopSliderAutoplay(); }); heroSlider.addEventListener('mouseleave', () => { startSliderAutoplay(); }); }
+
+            $('#toggleHeroFitBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const current = localStorage.getItem('hero_fit_mode') || 'contain';
+                const next = current === 'contain' ? 'cover' : 'contain';
+                localStorage.setItem('hero_fit_mode', next);
+                applyHeroFitMode(next);
+            });
+
+            $('#sliderToggleDock')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const dock = $('#sliderDock');
+                if (dock) {
+                    const isHidden = dock.classList.contains('translate-y-[calc(100%-16px)]');
+                    if (isHidden) {
+                        dock.classList.remove('translate-y-[calc(100%-16px)]', 'opacity-30');
+                    } else {
+                        dock.classList.add('translate-y-[calc(100%-16px)]', 'opacity-30');
+                    }
+                }
+            });
 
             $('#headerAdminBtn')?.addEventListener('click', (e) => {
                 e.preventDefault();
