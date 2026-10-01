@@ -741,17 +741,61 @@
 
             /* Hero Slider Mobile Ergonomics */
             #sliderContent {
-                min-height: 220px !important;
-                aspect-ratio: 16 / 10 !important;
+                height: 190px !important;
+                min-height: 190px !important;
+                max-height: 190px !important;
+                aspect-ratio: auto !important;
+                position: relative !important;
+                overflow: hidden !important;
+            }
+
+            #sliderHeroImage {
+                position: absolute !important;
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
+                object-fit: cover !important;
+                object-position: center !important;
+            }
+
+            #sliderHeroBackdrop {
+                display: none !important;
             }
 
             #sliderDock {
-                padding: 0.5rem !important;
+                padding: 0.35rem 0.5rem !important;
             }
 
             #sliderDock > div {
-                padding: 0.6rem 0.75rem !important;
+                padding: 0.45rem 0.65rem !important;
+                gap: 0.4rem !important;
+                background: rgba(10, 12, 20, 0.88) !important;
+                backdrop-filter: blur(16px) !important;
+            }
+
+            /* Stats Bar Mobile 2x2 Grid */
+            .stats-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
                 gap: 0.5rem !important;
+            }
+
+            .stats-grid > button {
+                padding: 0.65rem 0.75rem !important;
+                border-radius: 0.875rem !important;
+            }
+
+            .stats-grid .stat-number {
+                font-size: 1.25rem !important;
+                line-height: 1.5rem !important;
+                margin-top: 0.25rem !important;
+            }
+
+            /* Hide redundant back to top button on mobile since bottom nav has 'Início' */
+            #backToTop {
+                display: none !important;
             }
 
             /* Responsive safe-area for notched / gesture navigation phones */
@@ -2514,14 +2558,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
-                                        <button type="button" class="open-iframe flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer" data-id="${escapeHtml(hero.id)}">
+                                    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
+                                        <button type="button" class="open-iframe flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                                             <span class="pointer-events-none"><span class="sm:hidden">Testar</span><span class="hidden sm:inline">Testar no Modal</span></span>
                                         </button>
                                         <button type="button" id="sliderOpenApp" class="open-app inline-flex items-center justify-center gap-1 rounded-xl bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}" title="Abrir em Nova Aba">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                            <span class="pointer-events-none hidden xs:inline">Nova Aba</span>
+                                            <span class="pointer-events-none hidden sm:inline">Nova Aba</span>
                                         </button>
                                         <button type="button" id="sliderDetails" class="open-details rounded-xl border border-white/20 bg-white/10 px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white hover:bg-white/20 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}">
                                             <span class="pointer-events-none">Info</span>
@@ -2559,7 +2603,7 @@
             const isFavActive = !!state.store.favoritesOnly;
 
             return `
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div class="stats-grid grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
                 <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-3 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isAllActive ? 'bg-emerald-500/15 ring-2 ring-emerald-400/50 shadow-lg shadow-emerald-500/10' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="all" title="Ver catálogo completo de aplicativos">
                     <div class="flex items-center justify-between">
                         <span class="text-lg sm:text-xl">⚡</span>
