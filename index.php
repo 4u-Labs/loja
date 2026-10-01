@@ -688,6 +688,7 @@
                 min-width: 0 !important;
                 scrollbar-width: none !important;
                 box-sizing: border-box !important;
+                align-items: stretch !important;
             }
 
             .bento-grid::-webkit-scrollbar {
@@ -701,6 +702,12 @@
                 max-width: 84vw !important;
                 scroll-snap-align: center !important;
                 box-sizing: border-box !important;
+                height: auto !important;
+            }
+
+            .bento-grid > div > div {
+                padding: 1rem !important;
+                height: 100% !important;
             }
 
             .bento-large,
@@ -712,10 +719,49 @@
                 grid-row: span 1 !important;
             }
 
+            /* Inside bento cards: vertical compact stack, max 3 apps, zero dead space */
+            .bento-apps-container {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0.5rem !important;
+                justify-content: flex-start !important;
+            }
+
+            .bento-apps-container > *:nth-child(n+4) {
+                display: none !important;
+            }
+
+            .bento-grid .mini-app-btn {
+                padding: 0.6rem 0.75rem !important;
+            }
+
+            .bento-grid .view-category-btn {
+                margin-top: auto !important;
+                padding-top: 0.6rem !important;
+                padding-bottom: 0.6rem !important;
+            }
+
             /* Inside bento cards, mini apps stack in single column on mobile */
             .bento-grid .grid-cols-2,
             .bento-grid .grid-cols-3 {
                 grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+
+            /* SaaS Section Responsive 2-column Grid */
+            .saas-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 0.65rem !important;
+            }
+
+            .saas-card {
+                padding: 0.75rem 0.5rem !important;
+            }
+
+            .saas-icon {
+                width: 3.25rem !important;
+                height: 3.25rem !important;
+                margin-bottom: 0.4rem !important;
             }
 
             /* Horizontal touch scrollers */
@@ -1947,7 +1993,7 @@
                     </div>
                 </header>
                 <main id="main" class="mt-4 sm:mt-6 flex-1">${main}</main>
-                <footer class="mt-8 sm:mt-12">${footer || defaultFooter()}</footer>
+                <footer class="mt-8 sm:mt-12 mb-20 sm:mb-0">${footer || defaultFooter()}</footer>
 
                 <!-- Barra Fixa Inferior no Mobile (Bottom Navigation) -->
                 <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0c14]/95 backdrop-blur-2xl border-t border-white/10 px-3 py-2 flex items-center justify-around text-xs shadow-2xl safe-bottom">
@@ -2679,7 +2725,7 @@
             function renderMiniAppButton(app) {
                 const appIcon = app.iconUrl || defaultIcon((app.title || 'IA').slice(0, 2).toUpperCase(), statusTone(app.status));
                 return `
-                <button type="button" class="open-details flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group" data-id="${escapeHtml(app.id)}">
+                <button type="button" class="open-details mini-app-btn flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group" data-id="${escapeHtml(app.id)}">
                     <img alt="" src="${escapeHtml(appIcon)}" class="h-10 w-10 rounded-xl object-cover ring-1 ring-white/10 shrink-0 pointer-events-none app-icon-squircle" />
                     <div class="min-w-0 flex-1 pointer-events-none">
                         <div class="truncate text-sm font-medium text-white group-hover:text-emerald-300 transition-colors">${escapeHtml(app.title)}</div>
@@ -2698,6 +2744,7 @@
                     { gradient: 'from-amber-500/20 to-amber-900/30', btn: 'from-amber-500 to-amber-600' },
                 ];
                 const bentoClasses = ['bento-large', '', '', 'bento-wide'];
+                const isMobileFallback = typeof window !== 'undefined' && window.innerWidth <= 640;
                 return `
                 <div class="space-y-3">
                     <div class="flex items-center justify-between px-1">
@@ -2710,7 +2757,7 @@
                         ${topCategories.map((cat, i) => {
                             const scheme = fallbackSchemes[i % fallbackSchemes.length];
                             const bentoClass = bentoClasses[i] || '';
-                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, bentoClass.includes('large') ? 4 : 2);
+                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 4 : 2));
                             return `
                             <div class="glass border-gradient rounded-2xl bg-gradient-to-br ${scheme.gradient} overflow-hidden ${bentoClass} card-shine spotlight group cyber-corner">
                                 <div class="p-5 h-full flex flex-col">
@@ -2721,7 +2768,7 @@
                                         </div>
                                         <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${cat.count} apps</span>
                                     </div>
-                                    <div class="flex-1 grid gap-2.5 ${bentoClass.includes('large') ? 'grid-cols-1' : ''}">
+                                    <div class="flex-1 grid gap-2.5 ${bentoClass.includes('large') ? 'grid-cols-1' : ''} bento-apps-container">
                                         ${categoryApps.map(renderMiniAppButton).join('')}
                                     </div>
                                     <button type="button" class="view-category-btn mt-4 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
@@ -2735,15 +2782,16 @@
                 </div>`;
             }
 
+            const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
             const sideCat = categoriesWithCount.find(c => !['jogos', 'editores', 'geradores', 'financas', 'clones', 'saas'].includes(normKey(c.name)));
-            const jogosApps = pickAppsForCard(catJogos.name, 2);
-            const editoresApps = pickAppsForCard(catEditores.name, 2);
-            const geradoresApps = pickAppsForCard(catGeradores.name, 2);
+            const jogosApps = pickAppsForCard(catJogos.name, isMobile ? 3 : 2);
+            const editoresApps = pickAppsForCard(catEditores.name, isMobile ? 3 : 2);
+            const geradoresApps = pickAppsForCard(catGeradores.name, isMobile ? 3 : 2);
             const allFin = appsOfCategory(catFinancas.name);
             const finFeatured = allFin.filter(a => a.status === 'Destaque');
-            const finApps = [...finFeatured, ...allFin.filter(a => a.status !== 'Destaque')].slice(0, 4);
-            const sideApps = sideCat ? pickAppsForCard(sideCat.name, 4) : [];
-            const clonesApps = catClones ? pickAppsForCard(catClones.name, 6) : [];
+            const finApps = [...finFeatured, ...allFin.filter(a => a.status !== 'Destaque')].slice(0, isMobile ? 3 : 4);
+            const sideApps = sideCat ? pickAppsForCard(sideCat.name, isMobile ? 3 : 4) : [];
+            const clonesApps = catClones ? pickAppsForCard(catClones.name, isMobile ? 3 : 6) : [];
 
             function renderCategoryCard({ cat, scheme, apps, extraClass = '', innerGridClass = '' }) {
                 return `
@@ -2756,7 +2804,7 @@
                             </div>
                             <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${cat.count} apps</span>
                         </div>
-                        <div class="flex-1 grid gap-2.5 ${innerGridClass}">
+                        <div class="flex-1 grid gap-2.5 ${innerGridClass} bento-apps-container">
                             ${apps.map(renderMiniAppButton).join('')}
                         </div>
                         <button type="button" class="view-category-btn mt-4 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
@@ -2800,12 +2848,12 @@
                     <span class="rounded-full bg-white/10 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold text-zinc-300">${saasApps.length} apps</span>
                 </div>
                 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6 saas-grid">
                     ${saasApps.map(app => {
                         const icon = app.iconUrl || defaultIcon((app.title || 'IA').slice(0, 2).toUpperCase(), 'indigo');
                         return `
-                        <button type="button" class="open-details flex flex-col items-center text-center p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer group/item hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/10 w-full" data-id="${escapeHtml(app.id)}">
-                            <img alt="" src="${escapeHtml(icon)}" class="h-14 w-14 sm:h-20 sm:w-20 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/10 group-hover/item:ring-indigo-400/50 transition-all duration-300 pointer-events-none mb-2.5 sm:mb-3.5 app-icon-squircle shadow-md shadow-black/40" />
+                        <button type="button" class="open-details saas-card flex flex-col items-center text-center p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer group/item hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/10 w-full" data-id="${escapeHtml(app.id)}">
+                            <img alt="" src="${escapeHtml(icon)}" class="h-14 w-14 sm:h-20 sm:w-20 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/10 group-hover/item:ring-indigo-400/50 transition-all duration-300 pointer-events-none mb-2.5 sm:mb-3.5 app-icon-squircle shadow-md shadow-black/40 saas-icon" />
                             <div class="min-w-0 pointer-events-none w-full">
                                 <h4 class="text-xs sm:text-sm font-bold text-white group-hover/item:text-indigo-300 transition-colors line-clamp-1 mb-1" title="${escapeHtml(app.title)}">${escapeHtml(app.title)}</h4>
                                 <p class="text-[11px] sm:text-xs text-zinc-400 line-clamp-2 leading-relaxed" title="${escapeHtml(app.shortDescription || '')}">${escapeHtml(app.shortDescription || '')}</p>
