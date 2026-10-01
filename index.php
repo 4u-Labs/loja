@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <title>4u.ia.br — App Store</title>
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png?v=<?php echo file_exists('apple-touch-icon.png') ? filemtime('apple-touch-icon.png') : time(); ?>" />
@@ -90,10 +90,32 @@
             --gradient-4: #22d3ee;
         }
 
+        html {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            -webkit-text-size-adjust: 100% !important;
+        }
+
         body {
             background: #090a12;
             color: #f4f4f5;
             font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            position: relative !important;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #app,
+        main,
+        section {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
         }
 
         /* Animated background mesh */
@@ -349,37 +371,6 @@
             }
         }
 
-        @media (max-width: 640px) {
-            .bento-grid {
-                display: flex !important;
-                overflow-x: auto !important;
-                scroll-snap-type: x mandatory;
-                -webkit-overflow-scrolling: touch;
-                gap: 0.85rem;
-                padding-bottom: 0.75rem;
-                scrollbar-width: none;
-            }
-
-            .bento-grid::-webkit-scrollbar {
-                display: none;
-            }
-
-            .bento-grid > div {
-                flex: 0 0 85% !important;
-                max-width: 320px !important;
-                min-width: 270px !important;
-                scroll-snap-align: center;
-            }
-
-            .bento-large,
-            .bento-wide,
-            .bento-tall,
-            .bento-span-3,
-            .bento-full {
-                grid-column: span 1 !important;
-                grid-row: span 1 !important;
-            }
-        }
 
         /* Misc */
         .icon-bounce:hover svg {
@@ -677,6 +668,92 @@
                 font-size: 16px !important;
             }
 
+            /* Hide ambient blobs that can cause horizontal scroll blowout */
+            .aurora-blob {
+                display: none !important;
+            }
+
+            /* Bento Grid Horizontal Touch Carousel */
+            .bento-grid {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory !important;
+                -webkit-overflow-scrolling: touch !important;
+                gap: 0.75rem !important;
+                padding-bottom: 0.5rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                scrollbar-width: none !important;
+                box-sizing: border-box !important;
+            }
+
+            .bento-grid::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .bento-grid > div {
+                flex: 0 0 84vw !important;
+                width: 84vw !important;
+                min-width: 84vw !important;
+                max-width: 84vw !important;
+                scroll-snap-align: center !important;
+                box-sizing: border-box !important;
+            }
+
+            .bento-large,
+            .bento-wide,
+            .bento-tall,
+            .bento-span-3,
+            .bento-full {
+                grid-column: span 1 !important;
+                grid-row: span 1 !important;
+            }
+
+            /* Inside bento cards, mini apps stack in single column on mobile */
+            .bento-grid .grid-cols-2,
+            .bento-grid .grid-cols-3 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+
+            /* Horizontal touch scrollers */
+            .shelf-scroller {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                scroll-snap-type: x mandatory !important;
+                scrollbar-width: none !important;
+            }
+
+            .shelf-scroller::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .filter-pill {
+                scroll-snap-align: start;
+                touch-action: pan-x;
+                white-space: nowrap;
+            }
+
+            /* Hero Slider Mobile Ergonomics */
+            #sliderContent {
+                min-height: 220px !important;
+                aspect-ratio: 16 / 10 !important;
+            }
+
+            #sliderDock {
+                padding: 0.5rem !important;
+            }
+
+            #sliderDock > div {
+                padding: 0.6rem 0.75rem !important;
+                gap: 0.5rem !important;
+            }
+
             /* Responsive safe-area for notched / gesture navigation phones */
             .safe-bottom {
                 padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0.5rem)) !important;
@@ -686,24 +763,6 @@
             button, a, .cursor-pointer {
                 touch-action: manipulation;
                 -webkit-tap-highlight-color: transparent;
-            }
-
-            /* Smooth horizontal touch scrolling with no scrollbars */
-            .shelf-scroller, .bento-grid {
-                -webkit-overflow-scrolling: touch !important;
-                scroll-snap-type: x mandatory !important;
-                scrollbar-width: none !important;
-            }
-
-            .shelf-scroller::-webkit-scrollbar,
-            .bento-grid::-webkit-scrollbar {
-                display: none !important;
-            }
-
-            .filter-pill {
-                scroll-snap-align: start;
-                touch-action: pan-x;
-                white-space: nowrap;
             }
 
             /* Mobile dialogs full width with comfortable margins */
@@ -1809,9 +1868,9 @@
         function appShell({ title, subtitle, right, main, footer }) {
             return `
             <div class="mx-auto flex min-h-screen max-w-[1280px] flex-col px-3 sm:px-6 pb-24 sm:pb-12">
-                <header class="sticky top-0 z-40 pt-2 sm:pt-4 pb-2 bg-[#050709]/75 backdrop-blur-md transition-all">
+                <header class="sticky top-0 z-40 py-2 sm:py-3 bg-[#050709]/75 backdrop-blur-md transition-all">
                     <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/90 backdrop-blur-xl shadow-lg shadow-black/40">
-                        <div class="relative flex flex-row items-center justify-between gap-3 p-2.5 sm:p-4 sm:gap-6">
+                        <div class="relative flex flex-row items-center justify-between gap-2.5 sm:gap-6 px-3 py-2 sm:px-4 sm:py-2.5">
                             <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
                                 <a href="#/" class="group flex items-center gap-2.5 sm:gap-4 transition-transform hover:scale-[1.02] min-w-0">
                                     ${storeLogoMarkup()}
@@ -1873,31 +1932,20 @@
             const logo = safeText(state.prefs.storeLogoUrl);
             const showAdmin = localStorage.getItem('4uia_dev_mode') === 'true';
             return `
-            <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 sm:p-8">
-                <div class="flex flex-col gap-4 sm:gap-6 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-5 sm:pb-6 mb-5 sm:mb-6">
-                    <div class="flex items-center gap-3 sm:gap-4"> 
-                        ${logo ? `<img src="${escapeHtml(logo)}" alt="Logo" class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-cover ring-1 ring-white/10" />` : `<div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 grid place-items-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`} 
-                        <div>
-                            <span class="text-base sm:text-lg font-bold text-white tracking-tight">4u.ia.br</span>
-                            <div class="text-[11px] sm:text-xs text-zinc-500">Transformando ideias em apps</div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm">
-                        <a class="text-zinc-400 hover:text-white transition-colors" href="#/">Vitrine</a>
-                        <button type="button" class="open-cmd text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1">🔍 Busca</button>
-                        <button type="button" class="open-suggest text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer flex items-center gap-1">💡 Sugerir App</button>
-                        ${showAdmin ? `<a class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors" href="#/admin">Painel Admin</a>` : ''}
-                        <a class="text-zinc-400 hover:text-white transition-colors" href="https://4u.ia.br" target="_blank">4u.ia.br</a>
-                    </div>
+            <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2.5"> 
+                    ${logo ? `<img src="${escapeHtml(logo)}" alt="Logo" class="h-6 w-6 rounded-lg object-cover ring-1 ring-white/10" />` : `<div class="h-6 w-6 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 grid place-items-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`} 
+                    <span class="text-sm font-bold text-white tracking-tight">4u.ia.br</span>
+                    <span class="text-zinc-500 hidden md:inline">· Transformando ideias em apps</span>
+                    <span class="text-zinc-600 hidden sm:inline">© ${new Date().getFullYear()}</span>
                 </div>
-                <div class="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between text-xs text-zinc-500">
-                    <div>
-                        © ${new Date().getFullYear()} 4u.ia.br. Todos os direitos reservados.
-                    </div>
-                    <div class="flex gap-4 text-[10px] text-zinc-600 uppercase tracking-widest">
-                        <button type="button" class="open-privacy hover:text-emerald-400 transition-colors cursor-pointer">Privacidade</button>
-                        <button type="button" class="open-terms hover:text-cyan-400 transition-colors cursor-pointer">Termos</button>
-                    </div>
+                <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-zinc-400">
+                    <a class="hover:text-white transition-colors" href="#/">Vitrine</a>
+                    <button type="button" class="open-cmd hover:text-white transition-colors cursor-pointer">🔍 Busca</button>
+                    <button type="button" class="open-suggest text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer">💡 Sugerir App</button>
+                    ${showAdmin ? `<a class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors" href="#/admin">Admin</a>` : ''}
+                    <button type="button" class="open-privacy hover:text-zinc-200 transition-colors cursor-pointer">Privacidade</button>
+                    <button type="button" class="open-terms hover:text-zinc-200 transition-colors cursor-pointer">Termos</button>
                 </div>
             </div>`;
         }
@@ -2461,7 +2509,7 @@
                                                 <span id="sliderCategory" class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold shrink-0">${escapeHtml(hero.category || 'App')}</span>
                                             </div>
                                             <p id="sliderDescription" class="text-xs text-zinc-300 line-clamp-1">${escapeHtml(hero.shortDescription || '')}</p>
-                                            <div id="sliderTags" class="flex flex-wrap gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
+                                            <div id="sliderTags" class="hidden xs:flex flex-wrap gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
                                                 ${tags.map(t => `<span class="text-[10px] sm:text-[11px] text-zinc-400">#${escapeHtml(t)}</span>`).join('')}
                                             </div>
                                         </div>
@@ -2469,7 +2517,7 @@
                                     <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
                                         <button type="button" class="open-iframe flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer" data-id="${escapeHtml(hero.id)}">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                            <span class="pointer-events-none">Testar no Modal</span>
+                                            <span class="pointer-events-none"><span class="sm:hidden">Testar</span><span class="hidden sm:inline">Testar no Modal</span></span>
                                         </button>
                                         <button type="button" id="sliderOpenApp" class="open-app inline-flex items-center justify-center gap-1 rounded-xl bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}" title="Abrir em Nova Aba">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
