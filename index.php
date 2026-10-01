@@ -666,6 +666,85 @@
         #sliderContent {
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
+
+        /* ========================================================
+           Mobile Responsiveness & Touch Ergonomics
+           (Scoped to <= 640px to keep Desktop 100% untouched)
+           ======================================================== */
+        @media (max-width: 640px) {
+            /* Prevent iOS automatic zoom when focusing input fields */
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+
+            /* Responsive safe-area for notched / gesture navigation phones */
+            .safe-bottom {
+                padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0.5rem)) !important;
+            }
+
+            /* Touch action optimizations */
+            button, a, .cursor-pointer {
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            /* Smooth horizontal touch scrolling with no scrollbars */
+            .shelf-scroller, .bento-grid {
+                -webkit-overflow-scrolling: touch !important;
+                scroll-snap-type: x mandatory !important;
+                scrollbar-width: none !important;
+            }
+
+            .shelf-scroller::-webkit-scrollbar,
+            .bento-grid::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .filter-pill {
+                scroll-snap-align: start;
+                touch-action: pan-x;
+                white-space: nowrap;
+            }
+
+            /* Mobile dialogs full width with comfortable margins */
+            dialog {
+                max-width: 95vw !important;
+                width: 95vw !important;
+                margin: auto !important;
+                border-radius: 1.25rem !important;
+            }
+
+            #iframeDialog {
+                height: 94vh !important;
+                max-height: 94vh !important;
+                max-width: 96vw !important;
+                width: 96vw !important;
+            }
+
+            #iframeDialog > div {
+                padding: 0.75rem !important;
+                border-radius: 1.25rem !important;
+            }
+
+            #detailsDialog > div {
+                padding: 1.25rem !important;
+                border-radius: 1.25rem !important;
+            }
+
+            /* Turn off heavy 3D hover effects on mobile touch */
+            .card-3d:hover {
+                transform: none !important;
+            }
+
+            .card-3d:active {
+                transform: scale(0.99) !important;
+            }
+
+            /* Ensure sticky header stays sleek */
+            header.sticky {
+                top: 0;
+            }
+        }
     </style>
 </head>
 
@@ -1717,7 +1796,7 @@
         async function checkAuth() { const token = auth.getToken(); if (!token) return false; if (API.backend === 'php' && API.verify) { try { const res = await fetch(API.verify, { method: 'POST', headers: auth.getHeaders() }); if (res.ok) { const data = await res.json(); return data.valid === true; } auth.logout(); return false; } catch (err) { return false; } } return token.startsWith('local_admin_'); }
 
         // -------- UI Components --------
-        function storeLogoMarkup() { const logo = safeText(state.prefs.storeLogoUrl); if (logo) { return `<img id="storeLogoTrigger" src="${escapeHtml(logo)}" alt="Logo" class="h-12 w-12 rounded-2xl object-cover ring-2 ring-white/10 hover:ring-emerald-400/50 transition-all cursor-pointer" />`; } return ` <div id="storeLogoTrigger" class="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 via-cyan-500 to-teal-500 glow-sm ring-2 ring-white/10 cursor-pointer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div> `; }
+        function storeLogoMarkup() { const logo = safeText(state.prefs.storeLogoUrl); if (logo) { return `<img id="storeLogoTrigger" src="${escapeHtml(logo)}" alt="Logo" class="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/10 hover:ring-emerald-400/50 transition-all cursor-pointer" />`; } return ` <div id="storeLogoTrigger" class="grid h-9 w-9 sm:h-12 sm:w-12 place-items-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 via-cyan-500 to-teal-500 glow-sm ring-2 ring-white/10 cursor-pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white sm:w-6 sm:h-6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div> `; }
         function backendBadge() {
             return `<span class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300 ring-1 ring-emerald-400/30 shadow-sm"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>v2.1</span>`;
         }
@@ -1729,47 +1808,47 @@
         }
         function appShell({ title, subtitle, right, main, footer }) {
             return `
-            <div class="mx-auto flex min-h-screen max-w-[1280px] flex-col px-4 sm:px-6 pb-20 sm:pb-12">
-                <header class="sticky top-0 z-40 pt-3 sm:pt-4 pb-2 bg-[#050709]/75 backdrop-blur-md transition-all">
+            <div class="mx-auto flex min-h-screen max-w-[1280px] flex-col px-3 sm:px-6 pb-24 sm:pb-12">
+                <header class="sticky top-0 z-40 pt-2 sm:pt-4 pb-2 bg-[#050709]/75 backdrop-blur-md transition-all">
                     <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/90 backdrop-blur-xl shadow-lg shadow-black/40">
-                        <div class="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                            <div class="flex items-center gap-4">
-                                <a href="#/" class="group flex items-center gap-4 transition-transform hover:scale-[1.02]">
+                        <div class="relative flex flex-row items-center justify-between gap-3 p-2.5 sm:p-4 sm:gap-6">
+                            <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
+                                <a href="#/" class="group flex items-center gap-2.5 sm:gap-4 transition-transform hover:scale-[1.02] min-w-0">
                                     ${storeLogoMarkup()}
-                                    <div class="leading-tight">
-                                        <div class="flex items-center gap-2.5">
-                                            <span class="text-lg font-bold tracking-tight gradient-text">4u.ia.br</span>
+                                    <div class="leading-tight min-w-0">
+                                        <div class="flex items-center gap-2 sm:gap-2.5">
+                                            <span class="text-base sm:text-lg font-bold tracking-tight gradient-text">4u.ia.br</span>
                                             ${backendBadge()}
                                         </div>
-                                        <div class="text-xs text-zinc-400 mt-0.5">Plataforma de Aplicativos & IA</div>
+                                        <div class="text-xs text-zinc-400 mt-0.5 hidden sm:block">Plataforma de Aplicativos & IA</div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="flex flex-wrap items-center gap-2 sm:gap-3 justify-end">
-                                <button type="button" id="pwaInstallHeaderBtn" class="hidden rounded-xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 px-3.5 py-2 text-xs font-semibold text-cyan-300 hover:from-cyan-500/30 hover:to-emerald-500/30 transition-all items-center gap-1.5 cursor-pointer shadow-sm animate-pulse" title="Instalar aplicativo no seu aparelho">
+                            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                                <button type="button" id="pwaInstallHeaderBtn" class="hidden rounded-xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-cyan-300 hover:from-cyan-500/30 hover:to-emerald-500/30 transition-all items-center gap-1.5 cursor-pointer shadow-sm animate-pulse" title="Instalar aplicativo no seu aparelho">
                                     <span>📲</span>
                                     <span class="hidden sm:inline font-medium">Instalar App</span>
                                 </button>
-                                <button type="button" class="open-cmd rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-300 hover:bg-white/10 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer" title="Busca rápida (Ctrl+K)">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <button type="button" class="open-cmd rounded-xl border border-white/10 bg-white/5 p-2 sm:px-3 sm:py-2 text-xs text-zinc-300 hover:bg-white/10 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer" title="Busca rápida (Ctrl+K)">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                     <span class="hidden sm:inline font-medium">Buscar</span>
                                     <kbd class="hidden sm:inline-block rounded bg-white/10 px-1 py-0.5 text-[9px] text-zinc-400 font-mono">Ctrl+K</kbd>
                                 </button>
-                                <button type="button" class="open-suggest rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3.5 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 cursor-pointer glow-sm" title="Sugerir uma nova ferramenta ou relatar um bug">
+                                <button type="button" class="open-suggest rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 cursor-pointer glow-sm" title="Sugerir uma nova ferramenta ou relatar um bug">
                                     <span>💡</span>
-                                    <span>Sugerir App</span>
+                                    <span class="hidden xs:inline">Sugerir</span>
                                 </button>
                                 ${right ? right : ''}
                             </div>
                         </div>
                     </div>
                 </header>
-                <main id="main" class="mt-6 flex-1">${main}</main>
-                <footer class="mt-12">${footer || defaultFooter()}</footer>
+                <main id="main" class="mt-4 sm:mt-6 flex-1">${main}</main>
+                <footer class="mt-8 sm:mt-12">${footer || defaultFooter()}</footer>
 
                 <!-- Barra Fixa Inferior no Mobile (Bottom Navigation) -->
-                <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0c14]/92 backdrop-blur-xl border-t border-white/10 px-4 py-2 flex items-center justify-around text-xs shadow-2xl">
-                    <button type="button" id="mobNavHome" class="flex flex-col items-center gap-1 text-emerald-400 cursor-pointer">
+                <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0c14]/95 backdrop-blur-2xl border-t border-white/10 px-3 py-2 flex items-center justify-around text-xs shadow-2xl safe-bottom">
+                    <button type="button" id="mobNavHome" class="flex flex-col items-center gap-1 ${!state.store.favoritesOnly ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-white'} cursor-pointer">
                         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                         <span class="text-[10px] font-medium">Início</span>
                     </button>
@@ -1794,25 +1873,25 @@
             const logo = safeText(state.prefs.storeLogoUrl);
             const showAdmin = localStorage.getItem('4uia_dev_mode') === 'true';
             return `
-            <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-8">
-                <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-6 mb-6">
-                    <div class="flex items-center gap-4"> 
-                        ${logo ? `<img src="${escapeHtml(logo)}" alt="Logo" class="h-10 w-10 rounded-xl object-cover ring-1 ring-white/10" />` : `<div class="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 grid place-items-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`} 
+            <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 sm:p-8">
+                <div class="flex flex-col gap-4 sm:gap-6 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-5 sm:pb-6 mb-5 sm:mb-6">
+                    <div class="flex items-center gap-3 sm:gap-4"> 
+                        ${logo ? `<img src="${escapeHtml(logo)}" alt="Logo" class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-cover ring-1 ring-white/10" />` : `<div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 grid place-items-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`} 
                         <div>
-                            <span class="text-lg font-bold text-white tracking-tight">4u.ia.br</span>
-                            <div class="text-xs text-zinc-500">Transformando ideias em apps</div>
+                            <span class="text-base sm:text-lg font-bold text-white tracking-tight">4u.ia.br</span>
+                            <div class="text-[11px] sm:text-xs text-zinc-500">Transformando ideias em apps</div>
                         </div>
                     </div>
-                    <div class="flex flex-wrap items-center gap-6 text-sm">
+                    <div class="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm">
                         <a class="text-zinc-400 hover:text-white transition-colors" href="#/">Vitrine</a>
-                        <button type="button" class="open-cmd text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1">🔍 Busca Rápida</button>
-                        <button type="button" class="open-suggest text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer flex items-center gap-1">💡 Sugerir App / Feedback</button>
+                        <button type="button" class="open-cmd text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1">🔍 Busca</button>
+                        <button type="button" class="open-suggest text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer flex items-center gap-1">💡 Sugerir App</button>
                         ${showAdmin ? `<a class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors" href="#/admin">Painel Admin</a>` : ''}
                         <a class="text-zinc-400 hover:text-white transition-colors" href="https://4u.ia.br" target="_blank">4u.ia.br</a>
                     </div>
                 </div>
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="text-xs text-zinc-500">
+                <div class="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between text-xs text-zinc-500">
+                    <div>
                         © ${new Date().getFullYear()} 4u.ia.br. Todos os direitos reservados.
                     </div>
                     <div class="flex gap-4 text-[10px] text-zinc-600 uppercase tracking-widest">
@@ -1825,17 +1904,17 @@
 
         function searchBox({ value = '', id = 'q', placeholder = 'Buscar por título, tag, descrição...' }) {
             return `
-            <div class="relative flex-1 group">
-                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-zinc-500 group-focus-within:text-emerald-400 transition-colors">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21 15.8 15.8M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <div class="relative flex-1 group w-full">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 sm:pl-4 text-zinc-500 group-focus-within:text-emerald-400 transition-colors">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 21 15.8 15.8M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 </div>
-                <input id="${escapeHtml(id)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" class="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/30 transition-all" />
+                <input id="${escapeHtml(id)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" class="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 sm:py-3 pl-10 sm:pl-11 pr-3 sm:pr-4 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/30 transition-all" />
             </div>`;
         }
 
         function categorySelect({ id, value, categories }) {
             return `
-            <select id="${escapeHtml(id)}" class="rounded-xl border border-white/10 bg-[#0a0c14]/80 px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 sm:w-[200px] transition-all cursor-pointer">
+            <select id="${escapeHtml(id)}" class="w-full sm:w-[200px] rounded-xl border border-white/10 bg-[#0a0c14]/80 px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all cursor-pointer">
                 ${categories.map(c => `<option value="${escapeHtml(c)}" ${c === value ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
             </select>`;
         }
@@ -1848,7 +1927,7 @@
                 { v: 'nome', label: '🔤 Nome' }
             ];
             return `
-            <select id="${escapeHtml(id)}" class="rounded-xl border border-white/10 bg-[#0a0c14]/80 px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 sm:w-[180px] transition-all cursor-pointer">
+            <select id="${escapeHtml(id)}" class="w-full sm:w-[180px] rounded-xl border border-white/10 bg-[#0a0c14]/80 px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all cursor-pointer">
                 ${opts.map(o => `<option value="${escapeHtml(o.v)}" ${o.v === value ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('')}
             </select>`;
         }
@@ -2037,7 +2116,7 @@
                     <button type="button" class="open-app grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/15 hover:text-white transition-all cursor-pointer" title="Abrir em Nova Aba" data-id="${escapeHtml(app.id)}">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     </button>
-                    <button type="button" class="open-qr grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/15 hover:text-white transition-all cursor-pointer" title="QR Code para Smartphone" data-id="${escapeHtml(app.id)}">
+                    <button type="button" class="open-qr hidden sm:grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/15 hover:text-white transition-all cursor-pointer" title="QR Code para Smartphone" data-id="${escapeHtml(app.id)}">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     </button>
                     <button type="button" class="fav-btn grid h-8 w-8 place-items-center rounded-xl border transition-all cursor-pointer ${fav ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200' : 'border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10'}" title="${fav ? 'Remover dos favoritos' : 'Favoritar'}" data-id="${escapeHtml(app.id)}">
@@ -2211,22 +2290,22 @@
         ${renderBentoCategories()}
         ${renderSaaSSection()}
         
-        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-5 space-y-4">
+        <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 p-3.5 sm:p-5 space-y-3 sm:space-y-4">
             
             ${renderFilterPills(categoriesWithCount)}
 
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between pt-2 border-t border-white/5">
-                <div class="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between pt-2 border-t border-white/5">
+                <div class="flex flex-1 flex-col gap-2.5 sm:gap-3 sm:flex-row sm:items-center">
                     ${searchBox({ value: q, id: 'storeSearch', placeholder: 'Buscar apps por título, tags, funcionalidade...' })}
                     ${categorySelect({ id: 'storeCategory', value: cat, categories })}
                 </div>
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    ${sortSelect({ id: 'storeSort', value: sortBy })}
-                    <button id="toggleFavsBtn" class="rounded-xl border px-5 py-3 text-sm transition-all flex items-center gap-2 cursor-pointer ${favOn ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15' : 'border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10'}" title="Mostrar somente favoritos">
+                <div class="grid grid-cols-2 sm:flex sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <div class="col-span-2 sm:col-span-1">${sortSelect({ id: 'storeSort', value: sortBy })}</div>
+                    <button id="toggleFavsBtn" class="col-span-1 rounded-xl border px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${favOn ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15' : 'border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10'}" title="Mostrar somente favoritos">
                         ${heartSvg(favOn)}
                         <span>Favoritos</span><span class="rounded-full bg-white/10 px-2 py-0.5 text-xs text-zinc-200 ring-1 ring-white/10">${favCount}</span>
                     </button>
-                    <button id="clearFilters" class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm hover:bg-white/10 transition-all cursor-pointer">Limpar</button>
+                    <button id="clearFilters" class="col-span-1 rounded-xl border border-white/10 bg-white/5 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm hover:bg-white/10 transition-all cursor-pointer">Limpar</button>
                 </div>
             </div>
 
@@ -2290,13 +2369,13 @@
                 title: 'Descoberta',
                 subtitle: `${total} apps disponíveis`,
                 right: ` 
-                    <button id="reloadCatalogBtn" class="rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs sm:text-sm hover:bg-white/10 transition-all icon-bounce flex items-center gap-2 cursor-pointer">
+                    <button id="reloadCatalogBtn" class="rounded-xl border border-white/10 bg-white/5 p-2 sm:px-3.5 sm:py-2 text-xs sm:text-sm hover:bg-white/10 transition-all icon-bounce flex items-center gap-1.5 sm:gap-2 cursor-pointer" title="Atualizar catálogo">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        <span>Atualizar</span>
+                        <span class="hidden sm:inline">Atualizar</span>
                     </button>
                     ${showAdmin ? `
-                    <button id="headerAdminBtn" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine flex items-center gap-2 cursor-pointer">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Admin 
+                    <button id="headerAdminBtn" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 p-2 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine flex items-center gap-1.5 sm:gap-2 cursor-pointer" title="Painel Admin">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> <span class="hidden sm:inline">Admin</span> 
                     </button>` : ''} 
                 `,
                 main,
@@ -2311,18 +2390,18 @@
             const isContain = (localStorage.getItem('hero_fit_mode') || 'contain') === 'contain';
             if (featuredApps.length === 0) {
                 return `
-                <div class="border-gradient-animated rounded-3xl bg-[#0a0c14] p-8 sm:p-10 relative overflow-hidden">
+                <div class="border-gradient-animated rounded-3xl bg-[#0a0c14] p-5 sm:p-10 relative overflow-hidden">
                     <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_20%_20%,rgba(16,185,129,0.15),transparent)]"></div>
                     <div class="relative">
-                        <div class="flex flex-wrap items-center gap-3 mb-5">
-                            <span class="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-1.5 text-xs font-semibold text-white">Bem-vindo</span>
+                        <div class="flex flex-wrap items-center gap-2.5 mb-4 sm:mb-5">
+                            <span class="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-1 sm:py-1.5 text-xs font-semibold text-white">Bem-vindo</span>
                             ${backendBadge()}
                         </div>
-                        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight gradient-text mb-4">${escapeHtml(state.prefs.storeTitle || 'Descubra apps incríveis')}</h1>
-                        <p class="text-zinc-400 max-w-xl text-lg">${escapeHtml(state.prefs.storeSlogan || 'Confira nossa seleção exclusiva de webapps para alta produtividade e entretenimento.')}</p>
-                        <div class="mt-8 flex flex-wrap gap-4">
-                            ${showAdmin ? `<a href="#/admin" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine">Configurar no Admin</a>` : ''}
-                            <div class="text-sm text-zinc-500 self-center">${shown} de ${total} apps</div>
+                        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight gradient-text mb-3 sm:mb-4">${escapeHtml(state.prefs.storeTitle || 'Descubra apps incríveis')}</h1>
+                        <p class="text-zinc-400 max-w-xl text-sm sm:text-lg">${escapeHtml(state.prefs.storeSlogan || 'Confira nossa seleção exclusiva de webapps para alta produtividade e entretenimento.')}</p>
+                        <div class="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
+                            ${showAdmin ? `<a href="#/admin" class="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine">Configurar no Admin</a>` : ''}
+                            <div class="text-xs sm:text-sm text-zinc-500 self-center">${shown} de ${total} apps</div>
                         </div>
                     </div>
                 </div>`;
@@ -2337,17 +2416,18 @@
             return `
             <div class="border-gradient-animated rounded-3xl bg-[#0a0c14] overflow-hidden relative group cyber-corner" id="heroSlider">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(16,185,129,0.12),transparent)]"></div>
-                <div class="relative p-4 sm:p-8">
-                    <div class="flex flex-wrap items-center justify-between gap-2.5 mb-4 sm:mb-5">
-                        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                            <span class="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-1 sm:py-1.5 text-xs font-semibold text-white glow-sm">✨ Super Destaque</span>
+                <div class="relative p-3 sm:p-8">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 sm:mb-5">
+                        <div class="flex items-center gap-1.5 sm:gap-3 flex-wrap">
+                            <span class="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-2.5 sm:px-4 py-0.5 sm:py-1.5 text-[11px] sm:text-xs font-semibold text-white glow-sm">✨ Super Destaque</span>
                             <span id="sliderStatus">${hero.status ? statusPill(hero.status) : ''}</span>
-                            ${clicks > 0 ? `<span class="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/20">🔥 ${clicks} acessos</span>` : ''}
+                            ${clicks > 0 ? `<span class="rounded-full bg-amber-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold text-amber-300 ring-1 ring-amber-400/20">🔥 ${clicks} acessos</span>` : ''}
                         </div>
                         <div class="flex items-center gap-2 sm:gap-3 ml-auto">
-                            <button type="button" id="toggleHeroFitBtn" class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all cursor-pointer shadow-sm" title="Alternar entre Auto-Ajuste (sem cortes) e Preenchimento total">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                                <span id="heroFitLabel" class="pointer-events-none">${isContain ? 'Auto-Ajuste: Sem Cortes' : 'Preenchimento'}</span>
+                            <button type="button" id="toggleHeroFitBtn" class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all cursor-pointer shadow-sm" title="Alternar entre Auto-Ajuste (sem cortes) e Preenchimento total">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                <span id="heroFitLabel" class="pointer-events-none hidden xs:inline">${isContain ? 'Auto-Ajuste: Sem Cortes' : 'Preenchimento'}</span>
+                                <span class="pointer-events-none xs:hidden text-[10px] font-semibold">${isContain ? 'Sem Cortes' : 'Cover'}</span>
                             </button>
                             ${hasMultipleSlides ? `<span id="sliderCounter" class="text-xs text-zinc-400 font-medium">${state.slider.currentIndex + 1} / ${featuredApps.length}</span>` : ''}
                             <div class="text-xs text-zinc-500 hidden sm:block">${shown} de ${total} apps</div>
@@ -2363,7 +2443,7 @@
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </button>
                         ` : ''}
-                        <div id="sliderContent" class="relative aspect-[4/3] xs:aspect-[16/10] sm:aspect-[21/9] min-h-[340px] sm:min-h-[460px] w-full transition-all duration-300 ease-out z-10 overflow-hidden flex items-center justify-center bg-[#06080c]">
+                        <div id="sliderContent" class="relative aspect-[4/3] xs:aspect-[16/10] sm:aspect-[21/9] min-h-[260px] sm:min-h-[460px] w-full transition-all duration-300 ease-out z-10 overflow-hidden flex items-center justify-center bg-[#06080c]">
                             <img id="sliderHeroBackdrop" alt="" src="${escapeHtml(heroImg)}" class="absolute inset-0 h-full w-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none transition-all duration-500 ${heroImg && isContain ? '' : 'hidden'}" />
                             <img id="sliderHeroImage" alt="" src="${escapeHtml(heroImg)}" class="relative z-10 max-h-full max-w-full ${isContain ? 'object-contain mx-auto' : 'absolute inset-0 h-full w-full object-cover'} transition-all duration-500 pointer-events-none ${heroImg ? '' : 'hidden'}" />
                             <div id="sliderHeroPlaceholder" class="absolute inset-0 ${heroImg ? 'hidden' : ''}">
@@ -2371,35 +2451,35 @@
                                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(16,185,129,0.3),transparent)]"></div>
                             </div>
                             <div class="absolute inset-0 z-10 bg-gradient-to-t from-[#050709]/95 via-[#050709]/30 to-transparent pointer-events-none"></div>
-                            <div id="sliderDock" class="absolute bottom-0 left-0 right-0 p-3 sm:p-6 z-20 transition-all duration-300">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 backdrop-blur-md bg-black/60 p-3.5 sm:p-4 rounded-2xl border border-white/10 shadow-2xl">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <img id="sliderIcon" alt="" src="${escapeHtml(icon)}" class="h-11 w-11 sm:h-14 sm:w-14 rounded-2xl object-cover ring-1 ring-white/20 app-icon-squircle shadow-lg shrink-0" />
+                            <div id="sliderDock" class="absolute bottom-0 left-0 right-0 p-2 sm:p-6 z-20 transition-all duration-300">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 backdrop-blur-md bg-black/70 sm:bg-black/60 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 shadow-2xl">
+                                    <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                                        <img id="sliderIcon" alt="" src="${escapeHtml(icon)}" class="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl object-cover ring-1 ring-white/20 app-icon-squircle shadow-lg shrink-0" />
                                         <div class="min-w-0 flex-1">
                                             <div class="flex items-center gap-2 mb-0.5">
-                                                <h2 id="sliderTitle" class="text-base sm:text-lg font-bold tracking-tight text-white truncate">${escapeHtml(hero.title || 'Sem título')}</h2>
-                                                <span id="sliderCategory" class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-semibold shrink-0">${escapeHtml(hero.category || 'App')}</span>
+                                                <h2 id="sliderTitle" class="text-sm sm:text-lg font-bold tracking-tight text-white truncate">${escapeHtml(hero.title || 'Sem título')}</h2>
+                                                <span id="sliderCategory" class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold shrink-0">${escapeHtml(hero.category || 'App')}</span>
                                             </div>
                                             <p id="sliderDescription" class="text-xs text-zinc-300 line-clamp-1">${escapeHtml(hero.shortDescription || '')}</p>
-                                            <div id="sliderTags" class="flex flex-wrap gap-1.5 mt-1">
-                                                ${tags.map(t => `<span class="text-[11px] text-zinc-400">#${escapeHtml(t)}</span>`).join('')}
+                                            <div id="sliderTags" class="flex flex-wrap gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
+                                                ${tags.map(t => `<span class="text-[10px] sm:text-[11px] text-zinc-400">#${escapeHtml(t)}</span>`).join('')}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 shrink-0">
-                                        <button type="button" class="open-iframe flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer" data-id="${escapeHtml(hero.id)}">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
+                                        <button type="button" class="open-iframe flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer" data-id="${escapeHtml(hero.id)}">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                                             <span class="pointer-events-none">Testar no Modal</span>
                                         </button>
-                                        <button type="button" id="sliderOpenApp" class="open-app inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer" data-id="${escapeHtml(hero.id)}">
+                                        <button type="button" id="sliderOpenApp" class="open-app inline-flex items-center justify-center gap-1 rounded-xl bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}" title="Abrir em Nova Aba">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                            <span class="pointer-events-none">Nova Aba</span>
+                                            <span class="pointer-events-none hidden xs:inline">Nova Aba</span>
                                         </button>
-                                        <button type="button" id="sliderDetails" class="open-details rounded-xl border border-white/20 bg-white/10 px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white hover:bg-white/20 transition-all cursor-pointer" data-id="${escapeHtml(hero.id)}">
-                                            <span class="pointer-events-none">Detalhes</span>
+                                        <button type="button" id="sliderDetails" class="open-details rounded-xl border border-white/20 bg-white/10 px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white hover:bg-white/20 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}">
+                                            <span class="pointer-events-none">Info</span>
                                         </button>
-                                        <button type="button" id="sliderToggleDock" class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/15 p-2 sm:p-2.5 text-zinc-400 hover:text-white transition-all cursor-pointer" title="Ocultar/Exibir painel para ver banner completo">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        <button type="button" id="sliderToggleDock" class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/15 p-2 sm:p-2.5 text-zinc-400 hover:text-white transition-all cursor-pointer shrink-0" title="Ocultar/Exibir painel para ver banner completo">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                         </button>
                                     </div>
                                 </div>
@@ -2431,52 +2511,52 @@
             const isFavActive = !!state.store.favoritesOnly;
 
             return `
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-4 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isAllActive ? 'bg-emerald-500/15 ring-2 ring-emerald-400/50 shadow-lg shadow-emerald-500/10' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="all" title="Ver catálogo completo de aplicativos">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
+                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-3 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isAllActive ? 'bg-emerald-500/15 ring-2 ring-emerald-400/50 shadow-lg shadow-emerald-500/10' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="all" title="Ver catálogo completo de aplicativos">
                     <div class="flex items-center justify-between">
-                        <span class="text-xl">⚡</span>
-                        <span class="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 group-hover:text-emerald-300">Catálogo</span>
+                        <span class="text-lg sm:text-xl">⚡</span>
+                        <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-emerald-400 group-hover:text-emerald-300">Catálogo</span>
                     </div>
-                    <div class="mt-2 text-2xl sm:text-3xl font-bold gradient-text-vibrant stat-number">${state.apps.length}</div>
-                    <div class="text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
+                    <div class="mt-1 sm:mt-2 text-xl sm:text-3xl font-bold gradient-text-vibrant stat-number">${state.apps.length}</div>
+                    <div class="text-[11px] sm:text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
                         <span>Todos os Apps</span>
-                        <span class="text-[10px] text-zinc-500 group-hover:text-emerald-400">Ver ↓</span>
+                        <span class="text-[10px] text-zinc-500 group-hover:text-emerald-400 hidden xs:inline">Ver ↓</span>
                     </div>
                 </button>
 
-                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-4 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isPopularActive ? 'bg-amber-500/15 ring-2 ring-amber-400/50 shadow-lg shadow-amber-500/10' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="popular" title="Filtrar pelos apps mais acessados">
+                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-3 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isPopularActive ? 'bg-amber-500/15 ring-2 ring-amber-400/50 shadow-lg shadow-amber-500/10' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="popular" title="Filtrar pelos apps mais acessados">
                     <div class="flex items-center justify-between">
-                        <span class="text-xl">🔥</span>
-                        <span class="text-[10px] font-semibold uppercase tracking-wider text-amber-400 group-hover:text-amber-300">Top Acessos</span>
+                        <span class="text-lg sm:text-xl">🔥</span>
+                        <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-amber-400 group-hover:text-amber-300">Top Acessos</span>
                     </div>
-                    <div class="mt-2 text-2xl sm:text-3xl font-bold text-amber-400 stat-number">Populares</div>
-                    <div class="text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
+                    <div class="mt-1 sm:mt-2 text-xl sm:text-3xl font-bold text-amber-400 stat-number">Populares</div>
+                    <div class="text-[11px] sm:text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
                         <span>Mais Acessados</span>
-                        <span class="text-[10px] text-zinc-500 group-hover:text-amber-400">Filtrar ↓</span>
+                        <span class="text-[10px] text-zinc-500 group-hover:text-amber-400 hidden xs:inline">Filtrar ↓</span>
                     </div>
                 </button>
 
-                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-4 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isNewActive ? 'bg-cyan-500/15 ring-2 ring-cyan-400/50 shadow-lg shadow-cyan-500/10' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="new" title="Ver lançamentos e atualizações mais recentes">
+                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-3 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isNewActive ? 'bg-cyan-500/15 ring-2 ring-cyan-400/50 shadow-lg shadow-cyan-500/10' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="new" title="Ver lançamentos e atualizações mais recentes">
                     <div class="flex items-center justify-between">
-                        <span class="text-xl">🆕</span>
-                        <span class="text-[10px] font-semibold uppercase tracking-wider text-cyan-400 group-hover:text-cyan-300">Lançamentos</span>
+                        <span class="text-lg sm:text-xl">🆕</span>
+                        <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-cyan-400 group-hover:text-cyan-300">Lançamentos</span>
                     </div>
-                    <div class="mt-2 text-2xl sm:text-3xl font-bold text-cyan-400 stat-number">Recentes</div>
-                    <div class="text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
+                    <div class="mt-1 sm:mt-2 text-xl sm:text-3xl font-bold text-cyan-400 stat-number">Recentes</div>
+                    <div class="text-[11px] sm:text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
                         <span>Novidades</span>
-                        <span class="text-[10px] text-zinc-500 group-hover:text-cyan-400">Filtrar ↓</span>
+                        <span class="text-[10px] text-zinc-500 group-hover:text-cyan-400 hidden xs:inline">Filtrar ↓</span>
                     </div>
                 </button>
 
-                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-4 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isFavActive ? 'bg-emerald-500/20 ring-2 ring-emerald-400/60 shadow-lg shadow-emerald-500/15' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="fav" title="Ver somente seus aplicativos favoritos salvos">
+                <button type="button" class="quick-filter-btn glass border-gradient rounded-2xl p-3 sm:p-5 text-left group hover:scale-[1.02] transition-all cursor-pointer ${isFavActive ? 'bg-emerald-500/20 ring-2 ring-emerald-400/60 shadow-lg shadow-emerald-500/15' : 'bg-[#0a0c14]/60 hover:bg-[#0a0c14]/90'}" data-action="fav" title="Ver somente seus aplicativos favoritos salvos">
                     <div class="flex items-center justify-between">
-                        <span class="text-xl">⭐</span>
-                        <span class="text-[10px] font-semibold uppercase tracking-wider text-teal-400 group-hover:text-teal-300">Favoritos</span>
+                        <span class="text-lg sm:text-xl">⭐</span>
+                        <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-teal-400 group-hover:text-teal-300">Favoritos</span>
                     </div>
-                    <div class="mt-2 text-2xl sm:text-3xl font-bold text-emerald-300 stat-number">${favCount}</div>
-                    <div class="text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
+                    <div class="mt-1 sm:mt-2 text-xl sm:text-3xl font-bold text-emerald-300 stat-number">${favCount}</div>
+                    <div class="text-[11px] sm:text-xs text-zinc-400 mt-0.5 group-hover:text-white transition-colors flex items-center justify-between">
                         <span>Meus Favoritos</span>
-                        <span class="text-[10px] text-zinc-500 group-hover:text-emerald-300">Filtrar ↓</span>
+                        <span class="text-[10px] text-zinc-500 group-hover:text-emerald-300 hidden xs:inline">Filtrar ↓</span>
                     </div>
                 </button>
             </div>`;
@@ -2619,24 +2699,24 @@
             if (saasApps.length === 0) return '';
 
             return `
-            <div class="glass border-gradient rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent overflow-hidden card-shine spotlight group cyber-corner relative p-6">
-                <div class="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="h-3.5 w-3.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 glow-sm"></div>
-                        <h3 class="text-xl font-bold tracking-tight text-white">SaaS</h3>
+            <div class="glass border-gradient rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent overflow-hidden card-shine spotlight group cyber-corner relative p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-4 sm:mb-6 border-b border-white/5 pb-3 sm:pb-4">
+                    <div class="flex items-center gap-2.5 sm:gap-3">
+                        <div class="h-3 sm:h-3.5 w-3 sm:w-3.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 glow-sm"></div>
+                        <h3 class="text-lg sm:text-xl font-bold tracking-tight text-white">SaaS</h3>
                     </div>
-                    <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-zinc-300">${saasApps.length} apps</span>
+                    <span class="rounded-full bg-white/10 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold text-zinc-300">${saasApps.length} apps</span>
                 </div>
                 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-6">
                     ${saasApps.map(app => {
                         const icon = app.iconUrl || defaultIcon((app.title || 'IA').slice(0, 2).toUpperCase(), 'indigo');
                         return `
-                        <button type="button" class="open-details flex flex-col items-center text-center p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer group/item hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/10 w-full" data-id="${escapeHtml(app.id)}">
-                            <img alt="" src="${escapeHtml(icon)}" class="h-20 w-20 rounded-2xl object-cover ring-2 ring-white/10 group-hover/item:ring-indigo-400/50 transition-all duration-300 pointer-events-none mb-3.5 app-icon-squircle shadow-md shadow-black/40" />
+                        <button type="button" class="open-details flex flex-col items-center text-center p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer group/item hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/10 w-full" data-id="${escapeHtml(app.id)}">
+                            <img alt="" src="${escapeHtml(icon)}" class="h-14 w-14 sm:h-20 sm:w-20 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/10 group-hover/item:ring-indigo-400/50 transition-all duration-300 pointer-events-none mb-2.5 sm:mb-3.5 app-icon-squircle shadow-md shadow-black/40" />
                             <div class="min-w-0 pointer-events-none w-full">
-                                <h4 class="text-sm font-bold text-white group-hover/item:text-indigo-300 transition-colors line-clamp-1 mb-1" title="${escapeHtml(app.title)}">${escapeHtml(app.title)}</h4>
-                                <p class="text-xs text-zinc-400 line-clamp-2 leading-relaxed" title="${escapeHtml(app.shortDescription || '')}">${escapeHtml(app.shortDescription || '')}</p>
+                                <h4 class="text-xs sm:text-sm font-bold text-white group-hover/item:text-indigo-300 transition-colors line-clamp-1 mb-1" title="${escapeHtml(app.title)}">${escapeHtml(app.title)}</h4>
+                                <p class="text-[11px] sm:text-xs text-zinc-400 line-clamp-2 leading-relaxed" title="${escapeHtml(app.shortDescription || '')}">${escapeHtml(app.shortDescription || '')}</p>
                             </div>
                         </button>`;
                     }).join('')}
@@ -2688,52 +2768,52 @@
 
             return `
             <article class="group relative glass border-gradient rounded-2xl bg-[#0a0c14]/60 overflow-hidden card-3d card-shine spotlight transition-all duration-300 flex flex-col justify-between">
-                <button type="button" class="fav-btn absolute top-4 right-4 z-10 grid h-10 w-10 place-items-center rounded-xl border transition-all cursor-pointer ${fav ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20' : 'border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10'}" aria-pressed="${fav ? 'true' : 'false'}" title="${fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" data-id="${escapeHtml(app.id)}">
+                <button type="button" class="fav-btn absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-10 grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl border transition-all cursor-pointer ${fav ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20' : 'border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10'}" aria-pressed="${fav ? 'true' : 'false'}" title="${fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" data-id="${escapeHtml(app.id)}">
                     ${heartSvg(fav)}
                 </button>
                 
-                <button type="button" class="open-details relative w-full p-5 text-left cursor-pointer flex-1" data-id="${escapeHtml(app.id)}">
-                    <div class="flex items-start gap-4">
+                <button type="button" class="open-details relative w-full p-4 sm:p-5 text-left cursor-pointer flex-1" data-id="${escapeHtml(app.id)}">
+                    <div class="flex items-start gap-3 sm:gap-4">
                         <div class="relative shrink-0">
-                            <img alt="" src="${escapeHtml(icon)}" class="h-16 w-16 rounded-2xl object-cover ring-2 ring-white/10 group-hover:ring-emerald-400/30 transition-all app-icon-squircle pointer-events-none" />
-                            ${isFeatured ? `<span class="absolute -right-2 -top-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-2 py-1 text-[10px] font-bold text-white shadow-lg">★</span>` : ''}
-                            ${(!isFeatured && isNew) ? `<span class="absolute -right-2 -top-2 rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 px-2 py-1 text-[10px] font-bold text-white shadow-lg">NEW</span>` : ''}
+                            <img alt="" src="${escapeHtml(icon)}" class="h-14 w-14 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl object-cover ring-2 ring-white/10 group-hover:ring-emerald-400/30 transition-all app-icon-squircle pointer-events-none" />
+                            ${isFeatured ? `<span class="absolute -right-2 -top-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-2 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white shadow-lg">★</span>` : ''}
+                            ${(!isFeatured && isNew) ? `<span class="absolute -right-2 -top-2 rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 px-2 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white shadow-lg">NEW</span>` : ''}
                         </div>
-                        <div class="min-w-0 flex-1 pr-6">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <h3 class="truncate text-base font-semibold tracking-tight text-white group-hover:text-emerald-300 transition-colors">${highlightedTitle}</h3>
+                        <div class="min-w-0 flex-1 pr-6 sm:pr-8">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="truncate text-sm sm:text-base font-semibold tracking-tight text-white group-hover:text-emerald-300 transition-colors">${highlightedTitle}</h3>
                             </div>
-                            <div class="flex items-center gap-2 mb-2">
+                            <div class="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                                 ${app.status ? statusPill(app.status) : ''}
                                 ${clicks > 0 ? `<span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300 ring-1 ring-amber-400/20">🔥 ${clicks}</span>` : ''}
                             </div>
-                            <p class="line-clamp-2 text-sm text-zinc-400 leading-relaxed">${highlightedShort}</p>
+                            <p class="line-clamp-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">${highlightedShort}</p>
                         </div>
                     </div>
 
-                    <div class="mt-4 flex flex-wrap gap-1.5">
-                        <span class="rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-300 ring-1 ring-white/10">${escapeHtml(app.category || 'App')}</span>
-                        ${tags.map(t => `<span class="rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-zinc-400 ring-1 ring-white/10">#${q ? highlightMatches(t, q) : escapeHtml(t)}</span>`).join('')}
+                    <div class="mt-3 sm:mt-4 flex flex-wrap gap-1.5">
+                        <span class="rounded-full bg-white/5 px-2.5 py-1 text-[10px] sm:text-[11px] font-medium text-zinc-300 ring-1 ring-white/10">${escapeHtml(app.category || 'App')}</span>
+                        ${tags.map(t => `<span class="rounded-full bg-white/5 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] text-zinc-400 ring-1 ring-white/10">#${q ? highlightMatches(t, q) : escapeHtml(t)}</span>`).join('')}
                     </div>
 
-                    <div class="mt-4 flex items-center justify-between text-xs text-zinc-500 border-t border-white/5 pt-3">
+                    <div class="mt-3 sm:mt-4 flex items-center justify-between text-[11px] sm:text-xs text-zinc-500 border-t border-white/5 pt-2.5 sm:pt-3">
                         <span class="flex items-center gap-1">📅 ${escapeHtml(fmtDate(app.updatedAt || app.createdAt || Date.now()))}</span>
-                        <span class="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-400 font-medium">Ver detalhes →</span>
+                        <span class="text-emerald-400 font-medium sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">Ver detalhes →</span>
                     </div>
                 </button>
 
-                <div class="relative flex items-center gap-2 border-t border-white/10 p-3 bg-white/[0.02]">
-                    <button type="button" class="open-iframe flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 py-2.5 text-xs font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-sm shadow-emerald-500/20" title="Executar em janela modal sem sair da loja" data-id="${escapeHtml(app.id)}">
+                <div class="relative flex items-center gap-2 border-t border-white/10 p-2.5 sm:p-3 bg-white/[0.02]">
+                    <button type="button" class="open-iframe flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 py-2 sm:py-2.5 text-xs font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-sm shadow-emerald-500/20" title="Executar em janela modal sem sair da loja" data-id="${escapeHtml(app.id)}">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         <span class="pointer-events-none">Testar App</span>
                     </button>
-                    <button type="button" class="open-app grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="Abrir em nova aba" data-id="${escapeHtml(app.id)}">
+                    <button type="button" class="open-app grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0" title="Abrir em nova aba" data-id="${escapeHtml(app.id)}">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     </button>
-                    <button type="button" class="open-qr grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="QR Code para Smartphone" data-id="${escapeHtml(app.id)}">
+                    <button type="button" class="open-qr hidden sm:grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0" title="QR Code para Smartphone" data-id="${escapeHtml(app.id)}">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     </button>
-                    <button type="button" class="open-details grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="Mais informações" data-id="${escapeHtml(app.id)}">
+                    <button type="button" class="open-details grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0" title="Mais informações" data-id="${escapeHtml(app.id)}">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                     </button>
                 </div>
@@ -2768,7 +2848,30 @@
             if (sliderPrevBtn) { sliderPrevBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); sliderPrev(); startSliderAutoplay(); }); }
             if (sliderNextBtn) { sliderNextBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); sliderNext(); startSliderAutoplay(); }); }
             $$('.slider-dot').forEach(dot => { dot.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const index = parseInt(dot.getAttribute('data-index'), 10); if (!isNaN(index)) sliderGoTo(index); }); });
-            if (heroSlider) { heroSlider.addEventListener('mouseenter', () => { stopSliderAutoplay(); }); heroSlider.addEventListener('mouseleave', () => { startSliderAutoplay(); }); }
+            if (heroSlider) {
+                heroSlider.addEventListener('mouseenter', () => { stopSliderAutoplay(); });
+                heroSlider.addEventListener('mouseleave', () => { startSliderAutoplay(); });
+                let touchStartX = 0;
+                let touchStartY = 0;
+                heroSlider.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                    touchStartY = e.changedTouches[0].screenY;
+                }, { passive: true });
+                heroSlider.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].screenX;
+                    const touchEndY = e.changedTouches[0].screenY;
+                    const diffX = touchEndX - touchStartX;
+                    const diffY = touchEndY - touchStartY;
+                    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+                        if (diffX < 0) {
+                            sliderNext();
+                        } else {
+                            sliderPrev();
+                        }
+                        startSliderAutoplay();
+                    }
+                }, { passive: true });
+            }
 
             $('#toggleHeroFitBtn')?.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -3070,7 +3173,7 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                                 <span class="pointer-events-none">Nova Aba</span>
                             </button>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                 <button type="button" id="detailsQr" class="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10 transition-all cursor-pointer" title="📲 QR Code para Smartphone">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/></svg>
                                 </button>
