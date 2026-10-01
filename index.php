@@ -752,10 +752,29 @@
                 display: grid !important;
                 grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                 gap: 0.65rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
             }
 
             .saas-card {
                 padding: 0.75rem 0.5rem !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                overflow: hidden !important;
+            }
+
+            .saas-card > div {
+                min-width: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            .saas-card h4,
+            .saas-card p {
+                max-width: 100% !important;
+                word-break: break-word !important;
             }
 
             .saas-icon {
@@ -2420,7 +2439,7 @@
             const total = state.apps.length;
 
             const main = `
-    <section class="grid gap-6">
+    <section class="grid grid-cols-1 gap-6 w-full max-w-full min-w-0">
         ${renderGlobalAnnouncement()}
         ${renderHeroSection({ total, shown: shownTotal })}
         ${renderStatsBar()}
@@ -2839,7 +2858,7 @@
             if (saasApps.length === 0) return '';
 
             return `
-            <div class="glass border-gradient rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent overflow-hidden card-shine spotlight group cyber-corner relative p-4 sm:p-6">
+            <div class="glass border-gradient rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent overflow-hidden card-shine spotlight group cyber-corner relative p-4 sm:p-6 w-full max-w-full min-w-0">
                 <div class="flex items-center justify-between mb-4 sm:mb-6 border-b border-white/5 pb-3 sm:pb-4">
                     <div class="flex items-center gap-2.5 sm:gap-3">
                         <div class="h-3 sm:h-3.5 w-3 sm:w-3.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 glow-sm"></div>
