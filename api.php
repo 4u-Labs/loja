@@ -639,41 +639,16 @@ switch ($action) {
         $imageUrl = 'https://4u.ia.br/loja/uploads/' . $filename;
         file_put_contents(UPLOADS_DIR . '/' . $filename, $binaryData);
         
-        // --- INTEGRAR COM O ENCURTADOR NATIVO (links.json) ---
-        $linksPath = __DIR__ . '/../links.json';
-        if (!file_exists($linksPath) && file_exists(__DIR__ . '/../c/links.json')) {
-            $linksPath = __DIR__ . '/../c/links.json';
-        }
-        
+        // --- INTEGRAR COM O ENCURTADOR NATIVO (UrlShortener Engine) ---
         $finalUrl = $imageUrl;
-        
-        if (file_exists($linksPath)) {
-            $links = json_decode(file_get_contents($linksPath), true) ?? [];
-            
-            // Gerar slug único de 6 caracteres
-            $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            $charLength = strlen($characters);
-            do {
-                $code = '';
-                for ($i = 0; $i < 6; $i++) {
-                    $code .= $characters[mt_rand(0, $charLength - 1)];
-                }
-            } while (array_key_exists($code, $links));
-            
-            // Adicionar ao JSON no mesmo formato
-            $links[$code] = [
-                'url' => $imageUrl,
-                'created' => date('c'),
-                'clicks' => 0
-            ];
-            
-            file_put_contents($linksPath, json_encode($links, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-            
-            // Formatar URL curta
-            if (str_contains($linksPath, '/c/')) {
-                $finalUrl = 'https://4u.ia.br/c/' . $code;
-            } else {
-                $finalUrl = 'https://4u.ia.br/' . $code;
+        $engineFile = __DIR__ . '/../shortener_engine.php';
+        if (file_exists($engineFile)) {
+            require_once $engineFile;
+            try {
+                $res = UrlShortener::shorten($imageUrl, null, 'loja');
+                $finalUrl = $res['short_url'];
+            } catch (Throwable $e) {
+                // Fallback silencioso para URL da imagem original
             }
         }
         
@@ -697,9 +672,58 @@ switch ($action) {
             $binaryData = base64_decode($m[2]);
         }
         
-        $filename = 'img-' . time() . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
-        file_put_contents(UPLOADS_DIR . '/' . $filename, $binaryData);
-        jsonResponse(['success' => true, 'url' => 'uploads/' . $filename]);
+        $baseName = 'img-' . time() . '-' . bin2hex(random_bytes(4));
+        $finalUrl = '';
+
+        // Se for SVG, salva direto (vetorial já é leve)
+        if (strtolower($ext) === 'svg' || @strpos($binaryData, '<svg') !== false) {
+            $filename = $baseName . '.svg';
+            file_put_contents(UPLOADS_DIR . '/' . $filename, $binaryData);
+            $finalUrl = 'uploads/' . $filename;
+        } else if (function_exists('imagecreatefromstring') && function_exists('imagewebp')) {
+            // Conversão automática para WebP com redimensionamento inteligente
+            $img = @imagecreatefromstring($binaryData);
+            if ($img) {
+                imagepalettetotruecolor($img);
+                imagealphablending($img, false);
+                imagesavealpha($img, true);
+                
+                $width = imagesx($img);
+                $height = imagesy($img);
+                $maxDim = 1280; // Nenhum ícone ou hero precisa de mais de 1280px
+                
+                if ($width > $maxDim || $height > $maxDim) {
+                    if ($width >= $height) {
+                        $newWidth = $maxDim;
+                        $newHeight = (int)round(($height / $width) * $maxDim);
+                    } else {
+                        $newHeight = $maxDim;
+                        $newWidth = (int)round(($width / $height) * $maxDim);
+                    }
+                    $newImg = imagecreatetruecolor($newWidth, $newHeight);
+                    imagealphablending($newImg, false);
+                    imagesavealpha($newImg, true);
+                    imagecopyresampled($newImg, $img, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                    imagedestroy($img);
+                    $img = $newImg;
+                }
+                
+                $filename = $baseName . '.webp';
+                if (imagewebp($img, UPLOADS_DIR . '/' . $filename, 85)) {
+                    $finalUrl = 'uploads/' . $filename;
+                }
+                imagedestroy($img);
+            }
+        }
+        
+        // Fallback caso GD não consiga converter
+        if (!$finalUrl) {
+            $filename = $baseName . '.' . ($ext ?: 'png');
+            file_put_contents(UPLOADS_DIR . '/' . $filename, $binaryData);
+            $finalUrl = 'uploads/' . $filename;
+        }
+
+        jsonResponse(['success' => true, 'url' => $finalUrl]);
         break;
 
     default:
