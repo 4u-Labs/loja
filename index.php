@@ -1231,7 +1231,19 @@
 
         // -------- Config --------
         const BASE_URL = window.location.pathname.replace(/\/[^/]*$/, '');
-        let API = { catalog: '', upload: '', uploadBase64: '', status: '', login: '', verify: '', click: '', suggest: '', track: '', stats: '', backend: 'unknown' };
+        let API = {
+            catalog: 'api.php?action=catalog',
+            upload: 'api.php?action=upload',
+            uploadBase64: 'api.php?action=upload-base64',
+            status: 'api.php?action=status',
+            login: 'api.php?action=login',
+            verify: 'api.php?action=verify',
+            click: 'api.php?action=click',
+            suggest: 'api.php?action=suggest',
+            track: 'api.php?action=track',
+            stats: 'api.php?action=stats',
+            backend: 'php'
+        };
 
         // -------- Auth State --------
         const auth = {
@@ -1474,20 +1486,6 @@
         // -------- Default media generators --------
         function defaultIcon(initials = 'IA', tone = 'indigo') { const colors = { indigo: ['#6366f1', '#4f46e5'], cyan: ['#06b6d4', '#0891b2'], emerald: ['#10b981', '#059669'], fuchsia: ['#d946ef', '#c026d3'], amber: ['#f59e0b', '#d97706'], rose: ['#f43f5e', '#e11d48'], }; const [c1, c2] = colors[tone] || colors.indigo; const svg = ` <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect x="16" y="16" width="224" height="224" rx="56" fill="url(#g)"/><rect x="16" y="16" width="224" height="224" rx="56" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/><text x="50%" y="54%" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="76" font-weight="700" fill="rgba(255,255,255,.95)">${escapeHtml(initials).slice(0, 3)}</text></svg> `.trim(); return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
         function defaultHeroImage(title = 'Seu App', tone = 'indigo') { const colors = { indigo: '#6366f1', cyan: '#06b6d4', emerald: '#10b981', fuchsia: '#d946ef', amber: '#f59e0b', }; const c1 = colors[tone] || colors.indigo; const t = escapeHtml(title).slice(0, 28); const svg = ` <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}" stop-opacity="0.4"/><stop offset="0.5" stop-color="#0a0c14" stop-opacity="0.95"/><stop offset="1" stop-color="#050709"/></linearGradient><radialGradient id="glow" cx="30%" cy="30%" r="60%"><stop offset="0" stop-color="rgba(255,255,255,0.15)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></radialGradient><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/></pattern></defs><rect width="1600" height="900" fill="url(#bg)"/><rect width="1600" height="900" fill="url(#glow)"/><rect width="1600" height="900" fill="url(#grid)"/><circle cx="1300" cy="150" r="300" fill="${c1}" opacity="0.15"/><circle cx="200" cy="750" r="350" fill="#06b6d4" opacity="0.08"/><text x="100" y="500" font-family="Inter, system-ui, sans-serif" font-size="56" font-weight="800" fill="rgba(255,255,255,0.9)">${t}</text><text x="100" y="560" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="400" fill="rgba(255,255,255,0.5)">Adicione uma imagem de destaque no Admin</text></svg> `.trim(); return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
-
-        let API = {
-            catalog: 'api.php?action=catalog',
-            upload: 'api.php?action=upload',
-            uploadBase64: 'api.php?action=upload-base64',
-            status: 'api.php?action=status',
-            login: 'api.php?action=login',
-            verify: 'api.php?action=verify',
-            click: 'api.php?action=click',
-            suggest: 'api.php?action=suggest',
-            track: 'api.php?action=track',
-            stats: 'api.php?action=stats',
-            backend: 'php'
-        };
 
         // -------- Backend Detection --------
         async function detectBackend() {
