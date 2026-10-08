@@ -2344,12 +2344,12 @@
                 </button>
 
                 <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                    <button type="button" class="open-iframe inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3.5 py-2 text-xs font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-sm shadow-emerald-500/20" title="Testar App no Modal" data-id="${escapeHtml(app.id)}">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <button type="button" class="open-app inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3.5 py-2 text-xs font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-sm shadow-emerald-500/20" title="Abrir em Nova Aba" data-id="${escapeHtml(app.id)}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                         <span class="pointer-events-none">Testar</span>
                     </button>
-                    <button type="button" class="open-app grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/15 hover:text-white transition-all cursor-pointer" title="Abrir em Nova Aba" data-id="${escapeHtml(app.id)}">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    <button type="button" class="open-iframe grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/15 hover:text-white transition-all cursor-pointer" title="Testar no Modal" data-id="${escapeHtml(app.id)}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     </button>
                     <button type="button" class="open-qr hidden sm:grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/15 hover:text-white transition-all cursor-pointer" title="QR Code para Smartphone" data-id="${escapeHtml(app.id)}">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -2702,13 +2702,13 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
-                                        <button type="button" class="open-iframe flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                            <span class="pointer-events-none"><span class="sm:hidden">Testar</span><span class="hidden sm:inline">Testar no Modal</span></span>
+                                        <button type="button" id="sliderOpenApp" class="open-app flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all shadow-md shadow-emerald-500/25 cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}" title="Abrir em Nova Aba">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                            <span class="pointer-events-none"><span class="sm:hidden">Testar</span><span class="hidden sm:inline">Testar App</span></span>
                                         </button>
-                                        <button type="button" id="sliderOpenApp" class="open-app inline-flex items-center justify-center gap-1 rounded-xl bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}" title="Abrir em Nova Aba">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                            <span class="pointer-events-none hidden sm:inline">Nova Aba</span>
+                                        <button type="button" id="sliderOpenIframe" class="open-iframe inline-flex items-center justify-center gap-1 rounded-xl bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#050709] hover:bg-zinc-100 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}" title="Testar no Modal">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                            <span class="pointer-events-none hidden sm:inline">Modal</span>
                                         </button>
                                         <button type="button" id="sliderDetails" class="open-details rounded-xl border border-white/20 bg-white/10 px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white hover:bg-white/20 transition-all cursor-pointer shrink-0" data-id="${escapeHtml(hero.id)}">
                                             <span class="pointer-events-none">Info</span>
@@ -3043,12 +3043,12 @@
                 </button>
 
                 <div class="relative flex items-center gap-2 border-t border-white/10 p-2.5 sm:p-3 bg-white/[0.02]">
-                    <button type="button" class="open-iframe flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 py-2 sm:py-2.5 text-xs font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-sm shadow-emerald-500/20" title="Executar em janela modal sem sair da loja" data-id="${escapeHtml(app.id)}">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <button type="button" class="open-app flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 py-2 sm:py-2.5 text-xs font-bold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-sm shadow-emerald-500/20" title="Abrir aplicativo em nova aba" data-id="${escapeHtml(app.id)}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                         <span class="pointer-events-none">Testar App</span>
                     </button>
-                    <button type="button" class="open-app grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0" title="Abrir em nova aba" data-id="${escapeHtml(app.id)}">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    <button type="button" class="open-iframe grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0" title="Executar em janela modal sem sair da loja" data-id="${escapeHtml(app.id)}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     </button>
                     <button type="button" class="open-qr hidden sm:grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0" title="QR Code para Smartphone" data-id="${escapeHtml(app.id)}">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -3439,13 +3439,13 @@
 
                             <!-- Botões de Ação Principais -->
                             <div class="mt-3 pt-3 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                                <button type="button" id="detailsOpenIframe" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-md shadow-emerald-500/20">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                    <span class="pointer-events-none">Testar na Loja (Modal)</span>
-                                </button>
-                                <button type="button" id="detailsOpen" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-zinc-200 hover:bg-white/10 transition-all cursor-pointer">
+                                <button type="button" id="detailsOpen" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-md shadow-emerald-500/20">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                    <span class="pointer-events-none">Nova Aba</span>
+                                    <span class="pointer-events-none">Abrir App (Nova Aba)</span>
+                                </button>
+                                <button type="button" id="detailsOpenIframe" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-zinc-200 hover:bg-white/10 transition-all cursor-pointer">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    <span class="pointer-events-none">Testar no Modal</span>
                                 </button>
                                 <div class="flex items-center justify-end gap-1.5 shrink-0">
                                     <button type="button" id="detailsQr" class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="📲 QR Code">
@@ -5296,7 +5296,7 @@
                 const modalKey = '4uia_tip_modal_v1';
                 if (!localStorage.getItem(modalKey)) {
                     localStorage.setItem(modalKey, '1');
-                    setTimeout(() => toast('Novidade: clique em "Testar App" para usar a ferramenta sem sair da loja!', 'ok'), 3000);
+                    setTimeout(() => toast('Dica: clique em "Testar App" para abrir o app em nova aba ou use o botão ao lado para testar no modal!', 'ok'), 3000);
                 }
             } catch { }
         })();
