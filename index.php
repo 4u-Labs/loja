@@ -351,6 +351,22 @@
             grid-column: span 4;
         }
 
+        .bento-apps-container {
+            align-content: start !important;
+            justify-content: flex-start !important;
+            gap: 0.5rem !important;
+        }
+
+        .mini-app-btn {
+            padding: 0.5rem 0.75rem !important;
+            min-height: unset !important;
+            transition: all 0.2s ease;
+        }
+
+        .view-category-btn {
+            margin-top: auto !important;
+        }
+
         @media (max-width: 1024px) {
             .bento-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -2799,12 +2815,13 @@
             function pickAppsForCard(catName, n) { return appsOfCategory(catName).slice(0, n); }
             function renderMiniAppButton(app) {
                 const appIcon = app.iconUrl || defaultIcon((app.title || 'IA').slice(0, 2).toUpperCase(), statusTone(app.status));
+                const desc = safeText(app.shortDescription || '');
                 return `
-                <button type="button" class="open-details mini-app-btn flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group" data-id="${escapeHtml(app.id)}">
-                    <img alt="" src="${escapeHtml(appIcon)}" loading="lazy" decoding="async" class="h-10 w-10 rounded-xl object-cover ring-1 ring-white/10 shrink-0 pointer-events-none app-icon-squircle" />
+                <button type="button" class="open-details mini-app-btn flex w-full items-center gap-2.5 sm:gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group" data-id="${escapeHtml(app.id)}">
+                    <img alt="" src="${escapeHtml(appIcon)}" loading="lazy" decoding="async" class="h-8 w-8 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl object-cover ring-1 ring-white/10 shrink-0 pointer-events-none app-icon-squircle" />
                     <div class="min-w-0 flex-1 pointer-events-none">
-                        <div class="truncate text-sm font-medium text-white group-hover:text-emerald-300 transition-colors">${escapeHtml(app.title)}</div>
-                        <div class="truncate text-xs text-zinc-400">${escapeHtml(clampText(app.shortDescription || '', 40))}</div>
+                        <div class="truncate text-xs sm:text-sm font-medium text-white group-hover:text-emerald-300 transition-colors leading-tight">${escapeHtml(app.title)}</div>
+                        <div class="truncate text-[11px] sm:text-xs text-zinc-400 mt-0.5" title="${escapeHtml(desc)}">${escapeHtml(desc)}</div>
                     </div>
                 </button>`;
             }
@@ -2843,10 +2860,10 @@
                                         </div>
                                         <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${cat.count} apps</span>
                                     </div>
-                                    <div class="flex-1 grid gap-2.5 ${bentoClass.includes('large') ? 'grid-cols-1' : ''} bento-apps-container">
+                                    <div class="flex-1 grid gap-2 sm:gap-2.5 ${bentoClass.includes('large') ? 'grid-cols-1' : ''} bento-apps-container content-start">
                                         ${categoryApps.map(renderMiniAppButton).join('')}
                                     </div>
-                                    <button type="button" class="view-category-btn mt-4 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
+                                    <button type="button" class="view-category-btn mt-auto pt-3.5 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
                                         <span class="pointer-events-none">Ver todos</span>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                     </button>
@@ -2879,10 +2896,10 @@
                             </div>
                             <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${cat.count} apps</span>
                         </div>
-                        <div class="flex-1 grid gap-2.5 ${innerGridClass} bento-apps-container">
+                        <div class="flex-1 grid gap-2 sm:gap-2.5 ${innerGridClass} bento-apps-container content-start">
                             ${apps.map(renderMiniAppButton).join('')}
                         </div>
-                        <button type="button" class="view-category-btn mt-4 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
+                        <button type="button" class="view-category-btn mt-auto pt-3.5 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
                             <span class="pointer-events-none">Ver todos</span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
