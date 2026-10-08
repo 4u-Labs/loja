@@ -1281,6 +1281,12 @@
         function safeText(s) { return String(s ?? '').trim(); }
         function normKey(s) { return safeText(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
         function clampText(s, max = 160) { s = safeText(s); return s.length > max ? s.slice(0, max - 1) + '…' : s; }
+        function cleanTitle(s) {
+            const raw = safeText(s);
+            if (!raw) return 'Sem título';
+            const match = raw.match(/^(.*?)(?:\s*[—–]\s*|\s+-\s+|:\s+)/);
+            return (match && match[1].trim()) ? match[1].trim() : raw;
+        }
         function normalizeTags(input) { if (Array.isArray(input)) return input.map(t => safeText(t)).filter(Boolean); const raw = safeText(input); if (!raw) return []; return raw.split(',').map(t => t.trim()).filter(Boolean).slice(0, 24); }
         function fmtDate(ts) { try { const d = new Date(ts); return d.toLocaleDateString('pt-BR', { year: 'numeric', month: 'short', day: '2-digit' }); } catch { return ''; } }
         function uid() { return 'app_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16); }
@@ -2815,12 +2821,14 @@
             function pickAppsForCard(catName, n) { return appsOfCategory(catName).slice(0, n); }
             function renderMiniAppButton(app) {
                 const appIcon = app.iconUrl || defaultIcon((app.title || 'IA').slice(0, 2).toUpperCase(), statusTone(app.status));
+                const rawTitle = safeText(app.title || 'Sem título');
+                const displayTitle = cleanTitle(rawTitle);
                 const desc = safeText(app.shortDescription || '');
                 return `
                 <button type="button" class="open-details mini-app-btn flex w-full items-center gap-2.5 sm:gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer group" data-id="${escapeHtml(app.id)}">
                     <img alt="" src="${escapeHtml(appIcon)}" loading="lazy" decoding="async" class="h-8 w-8 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl object-cover ring-1 ring-white/10 shrink-0 pointer-events-none app-icon-squircle" />
                     <div class="min-w-0 flex-1 pointer-events-none">
-                        <div class="truncate text-xs sm:text-sm font-medium text-white group-hover:text-emerald-300 transition-colors leading-tight">${escapeHtml(app.title)}</div>
+                        <div class="truncate text-xs sm:text-sm font-medium text-white group-hover:text-emerald-300 transition-colors leading-tight" title="${escapeHtml(rawTitle)}">${escapeHtml(displayTitle)}</div>
                         <div class="truncate text-[11px] sm:text-xs text-zinc-400 mt-0.5" title="${escapeHtml(desc)}">${escapeHtml(desc)}</div>
                     </div>
                 </button>`;
@@ -2849,7 +2857,7 @@
                         ${topCategories.map((cat, i) => {
                             const scheme = fallbackSchemes[i % fallbackSchemes.length];
                             const bentoClass = bentoClasses[i] || '';
-                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 6 : 2));
+                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 6 : 3));
                             return `
                             <div class="glass border-gradient rounded-2xl bg-gradient-to-br ${scheme.gradient} overflow-hidden ${bentoClass} card-shine spotlight group cyber-corner">
                                 <div class="p-5 h-full flex flex-col">
@@ -2877,8 +2885,8 @@
             const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
             const sideCat = categoriesWithCount.find(c => !['jogos', 'editores', 'geradores', 'financas', 'clones', 'saas'].includes(normKey(c.name)));
             const jogosApps = pickAppsForCard(catJogos.name, isMobile ? 3 : 6);
-            const editoresApps = pickAppsForCard(catEditores.name, isMobile ? 3 : 2);
-            const geradoresApps = pickAppsForCard(catGeradores.name, isMobile ? 3 : 2);
+            const editoresApps = pickAppsForCard(catEditores.name, isMobile ? 3 : 3);
+            const geradoresApps = pickAppsForCard(catGeradores.name, isMobile ? 3 : 3);
             const allFin = appsOfCategory(catFinancas.name);
             const finFeatured = allFin.filter(a => a.status === 'Destaque');
             const finApps = [...finFeatured, ...allFin.filter(a => a.status !== 'Destaque')].slice(0, isMobile ? 3 : 4);
