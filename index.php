@@ -2849,7 +2849,7 @@
                         ${topCategories.map((cat, i) => {
                             const scheme = fallbackSchemes[i % fallbackSchemes.length];
                             const bentoClass = bentoClasses[i] || '';
-                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 4 : 2));
+                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 6 : 2));
                             return `
                             <div class="glass border-gradient rounded-2xl bg-gradient-to-br ${scheme.gradient} overflow-hidden ${bentoClass} card-shine spotlight group cyber-corner">
                                 <div class="p-5 h-full flex flex-col">
@@ -2876,7 +2876,7 @@
 
             const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
             const sideCat = categoriesWithCount.find(c => !['jogos', 'editores', 'geradores', 'financas', 'clones', 'saas'].includes(normKey(c.name)));
-            const jogosApps = pickAppsForCard(catJogos.name, isMobile ? 3 : 2);
+            const jogosApps = pickAppsForCard(catJogos.name, isMobile ? 3 : 6);
             const editoresApps = pickAppsForCard(catEditores.name, isMobile ? 3 : 2);
             const geradoresApps = pickAppsForCard(catGeradores.name, isMobile ? 3 : 2);
             const allFin = appsOfCategory(catFinancas.name);
