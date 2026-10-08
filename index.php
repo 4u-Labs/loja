@@ -355,12 +355,20 @@
             align-content: start !important;
             justify-content: flex-start !important;
             gap: 0.5rem !important;
+            margin-bottom: 1rem !important;
         }
 
         .mini-app-btn {
             padding: 0.5rem 0.75rem !important;
             min-height: unset !important;
             transition: all 0.2s ease;
+        }
+
+        @media (min-width: 641px) {
+            .bento-grid > div:not(.bento-large) .mini-app-btn {
+                width: calc(100% - 0.875rem) !important;
+                max-width: calc(100% - 0.875rem) !important;
+            }
         }
 
         .view-category-btn {
@@ -2857,7 +2865,7 @@
                         ${topCategories.map((cat, i) => {
                             const scheme = fallbackSchemes[i % fallbackSchemes.length];
                             const bentoClass = bentoClasses[i] || '';
-                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 6 : 3));
+                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 8 : 3));
                             return `
                             <div class="glass border-gradient rounded-2xl bg-gradient-to-br ${scheme.gradient} overflow-hidden ${bentoClass} card-shine spotlight group cyber-corner">
                                 <div class="p-5 h-full flex flex-col">
@@ -2868,10 +2876,10 @@
                                         </div>
                                         <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${cat.count} apps</span>
                                     </div>
-                                    <div class="flex-1 grid gap-2 sm:gap-2.5 ${bentoClass.includes('large') ? 'grid-cols-1' : ''} bento-apps-container content-start">
+                                    <div class="flex-1 grid gap-2 sm:gap-2.5 ${bentoClass.includes('large') ? 'grid-cols-1' : ''} bento-apps-container content-start mb-3 sm:mb-4">
                                         ${categoryApps.map(renderMiniAppButton).join('')}
                                     </div>
-                                    <button type="button" class="view-category-btn mt-auto pt-3.5 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
+                                    <button type="button" class="view-category-btn mt-auto w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
                                         <span class="pointer-events-none">Ver todos</span>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                     </button>
@@ -2884,7 +2892,7 @@
 
             const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
             const sideCat = categoriesWithCount.find(c => !['jogos', 'editores', 'geradores', 'financas', 'clones', 'saas'].includes(normKey(c.name)));
-            const jogosApps = pickAppsForCard(catJogos.name, isMobile ? 3 : 6);
+            const jogosApps = pickAppsForCard(catJogos.name, isMobile ? 3 : 8);
             const editoresApps = pickAppsForCard(catEditores.name, isMobile ? 3 : 3);
             const geradoresApps = pickAppsForCard(catGeradores.name, isMobile ? 3 : 3);
             const allFin = appsOfCategory(catFinancas.name);
@@ -2904,10 +2912,10 @@
                             </div>
                             <span class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-300">${cat.count} apps</span>
                         </div>
-                        <div class="flex-1 grid gap-2 sm:gap-2.5 ${innerGridClass} bento-apps-container content-start">
+                        <div class="flex-1 grid gap-2 sm:gap-2.5 ${innerGridClass} bento-apps-container content-start mb-3 sm:mb-4">
                             ${apps.map(renderMiniAppButton).join('')}
                         </div>
-                        <button type="button" class="view-category-btn mt-auto pt-3.5 w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
+                        <button type="button" class="view-category-btn mt-auto w-full rounded-xl bg-gradient-to-r ${scheme.btn} px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-all btn-shine flex items-center justify-center gap-2 cursor-pointer" data-category="${escapeHtml(cat.name)}">
                             <span class="pointer-events-none">Ver todos</span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
