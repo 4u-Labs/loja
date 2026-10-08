@@ -326,7 +326,6 @@
         .bento-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(2, auto);
             gap: 1rem;
         }
 
@@ -2855,15 +2854,40 @@
             }
 
             if (!mustHave) {
-                const topCategories = categoriesWithCount.slice(0, 4);
+                const preferredKeys = [
+                    'jogos',
+                    'utilitarios',
+                    'gestao & negocios',
+                    'dev & codigo',
+                    'tecnico & engenharia',
+                    'design & midia'
+                ];
+                const selectedCats = [];
+                const usedNames = new Set();
+                preferredKeys.forEach(k => {
+                    const found = byNorm.get(k);
+                    if (found && !usedNames.has(found.name)) {
+                        selectedCats.push(found);
+                        usedNames.add(found.name);
+                    }
+                });
+                categoriesWithCount.forEach(c => {
+                    if (selectedCats.length < 6 && !usedNames.has(c.name)) {
+                        selectedCats.push(c);
+                        usedNames.add(c.name);
+                    }
+                });
+                const topCategories = selectedCats;
                 if (topCategories.length === 0) return '';
                 const fallbackSchemes = [
                     { gradient: 'from-indigo-500/20 to-indigo-900/30', btn: 'from-indigo-500 to-indigo-600' },
                     { gradient: 'from-emerald-500/20 to-emerald-900/30', btn: 'from-emerald-500 to-emerald-600' },
                     { gradient: 'from-fuchsia-500/20 to-fuchsia-900/30', btn: 'from-fuchsia-500 to-fuchsia-600' },
                     { gradient: 'from-amber-500/20 to-amber-900/30', btn: 'from-amber-500 to-amber-600' },
+                    { gradient: 'from-cyan-500/20 to-blue-900/30', btn: 'from-cyan-500 to-blue-600' },
+                    { gradient: 'from-pink-500/20 to-rose-900/30', btn: 'from-pink-500 to-rose-600' },
                 ];
-                const bentoClasses = ['bento-large', '', '', 'bento-wide'];
+                const bentoClasses = ['bento-large', '', '', 'bento-wide', 'bento-wide', 'bento-wide'];
                 const isMobileFallback = typeof window !== 'undefined' && window.innerWidth <= 640;
                 return `
                 <div class="space-y-3">
