@@ -377,12 +377,7 @@
                 grid-template-columns: minmax(0, 1fr) !important;
             }
 
-            .bento-grid > div:not(.bento-large) .bento-apps-container {
-                padding-right: 1.25rem !important;
-                box-sizing: border-box !important;
-            }
-
-            .bento-grid > div:not(.bento-large) .mini-app-btn {
+            .bento-grid .mini-app-btn {
                 width: 100% !important;
                 max-width: 100% !important;
             }
