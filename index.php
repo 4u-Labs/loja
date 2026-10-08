@@ -2860,7 +2860,9 @@
                     'gestao & negocios',
                     'dev & codigo',
                     'tecnico & engenharia',
-                    'design & midia'
+                    'design & midia',
+                    'seguranca & privacidade',
+                    'produtividade'
                 ];
                 const selectedCats = [];
                 const usedNames = new Set();
@@ -2872,7 +2874,7 @@
                     }
                 });
                 categoriesWithCount.forEach(c => {
-                    if (selectedCats.length < 6 && !usedNames.has(c.name)) {
+                    if (selectedCats.length < 8 && !usedNames.has(c.name)) {
                         selectedCats.push(c);
                         usedNames.add(c.name);
                     }
@@ -2886,8 +2888,10 @@
                     { gradient: 'from-amber-500/20 to-amber-900/30', btn: 'from-amber-500 to-amber-600' },
                     { gradient: 'from-cyan-500/20 to-blue-900/30', btn: 'from-cyan-500 to-blue-600' },
                     { gradient: 'from-pink-500/20 to-rose-900/30', btn: 'from-pink-500 to-rose-600' },
+                    { gradient: 'from-teal-500/20 to-emerald-900/30', btn: 'from-teal-500 to-emerald-600' },
+                    { gradient: 'from-sky-500/20 to-indigo-900/30', btn: 'from-sky-500 to-indigo-600' },
                 ];
-                const bentoClasses = ['bento-large', '', '', 'bento-wide', 'bento-wide', 'bento-wide'];
+                const bentoClasses = ['bento-large', '', '', 'bento-wide', 'bento-wide', 'bento-wide', 'bento-wide', 'bento-wide'];
                 const isMobileFallback = typeof window !== 'undefined' && window.innerWidth <= 640;
                 return `
                 <div class="space-y-3">
@@ -2901,7 +2905,8 @@
                         ${topCategories.map((cat, i) => {
                             const scheme = fallbackSchemes[i % fallbackSchemes.length];
                             const bentoClass = bentoClasses[i] || '';
-                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, isMobileFallback ? 3 : (bentoClass.includes('large') ? 8 : 3));
+                            const maxApps = bentoClass.includes('large') ? (isMobileFallback ? 3 : 8) : (i >= 4 ? 2 : 3);
+                            const categoryApps = sortApps(state.apps.filter(a => safeText(a.category) === cat.name), 'destaque').slice(0, maxApps);
                             return `
                             <div class="glass border-gradient rounded-2xl bg-gradient-to-br ${scheme.gradient} overflow-hidden ${bentoClass} card-shine spotlight group cyber-corner">
                                 <div class="p-5 h-full flex flex-col">
