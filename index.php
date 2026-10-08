@@ -2076,10 +2076,19 @@
         function searchBox({ value = '', id = 'q', placeholder = 'Buscar por título, tag, descrição...' }) {
             return `
             <div class="relative flex-1 group w-full">
-                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 sm:pl-4 text-zinc-500 group-focus-within:text-emerald-400 transition-colors">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 21 15.8 15.8M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <!-- Efeito Glow de Fundo -->
+                <div class="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-emerald-500/40 via-cyan-500/30 to-teal-500/40 opacity-75 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:from-emerald-400 group-focus-within:via-cyan-400 group-focus-within:to-emerald-400 blur-[2px] transition-all duration-300 pointer-events-none"></div>
+
+                <!-- Campo de Busca com Contorno Destacado -->
+                <div class="relative flex items-center w-full rounded-xl bg-[#0a0d17] border border-emerald-500/50 group-hover:border-emerald-400/80 group-focus-within:border-emerald-400 group-focus-within:ring-2 group-focus-within:ring-emerald-400/30 transition-all duration-200 shadow-[0_0_15px_rgba(16,185,129,0.12)] group-focus-within:shadow-[0_0_22px_rgba(16,185,129,0.25)]">
+                    <div class="pointer-events-none pl-3.5 sm:pl-4 text-emerald-400 group-focus-within:text-cyan-300 transition-colors">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21 15.8 15.8M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                    </div>
+                    <input id="${escapeHtml(id)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" class="w-full bg-transparent py-2.5 sm:py-3 pl-3 pr-9 sm:pr-10 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none transition-all font-medium" />
+                    <div class="pr-3 flex items-center">
+                        ${value ? `<button type="button" onclick="const inp=document.getElementById('${escapeHtml(id)}'); if(inp){ inp.value=''; inp.dispatchEvent(new Event('input')); inp.focus(); }" class="text-zinc-400 hover:text-white transition-colors cursor-pointer text-xs" title="Limpar busca">✕</button>` : `<kbd class="hidden sm:inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 group-focus-within:border-emerald-500/30 group-focus-within:text-emerald-300 transition-colors" title="Pressione / para buscar">/</kbd>`}
+                    </div>
                 </div>
-                <input id="${escapeHtml(id)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" class="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 sm:py-3 pl-10 sm:pl-11 pr-3 sm:pr-4 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/30 transition-all" />
             </div>`;
         }
 
