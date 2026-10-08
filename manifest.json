@@ -1,7 +1,7 @@
 {
-    "name": "4u.ia.br",
-    "short_name": "4u.ia.br",
-    "description": "Plataforma de Apps 4U",
+    "name": "4u Hub",
+    "short_name": "4u Hub",
+    "description": "Plataforma de Apps 4u Hub",
     "start_url": "./index.php",
     "display": "standalone",
     "background_color": "#050709",

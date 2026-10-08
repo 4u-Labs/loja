@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-    <title>4u.ia.br — App Store</title>
+    <title>4u Hub — Plataforma de Aplicativos & IA</title>
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png?v=<?php echo file_exists('apple-touch-icon.png') ? filemtime('apple-touch-icon.png') : time(); ?>" />
     <link rel="manifest" href="manifest.json?v=<?php echo file_exists('manifest.json') ? filemtime('manifest.json') : time(); ?>">
@@ -13,27 +13,27 @@
     <meta name="theme-color" content="#10b981">
     <link rel="canonical" href="https://4u.ia.br/loja/">
 
-    <meta name="description" content="4u.ia.br App Store — Plataforma de alta performance para descoberta e uso de aplicativos modulares, ferramentas com inteligência artificial e soluções de produtividade." />
-    <meta name="keywords" content="aplicativos, webapps, inteligência artificial, IA, produtividade, ferramentas online, app store, utilitários, automação, 4u.ia.br" />
-    <meta name="author" content="4u.ia.br" />
+    <meta name="description" content="4u Hub — Plataforma de alta performance para descoberta e uso de aplicativos modulares, ferramentas com inteligência artificial e soluções de produtividade." />
+    <meta name="keywords" content="aplicativos, webapps, inteligência artificial, IA, produtividade, ferramentas online, app store, utilitários, automação, 4u hub, 4u.ia.br" />
+    <meta name="author" content="4u Hub" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <!-- Meta Tags OG (Premium Finish) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://4u.ia.br/loja/" />
-    <meta property="og:site_name" content="4u.ia.br — App Store" />
-    <meta property="og:title" content="4u.ia.br — Loja de Aplicativos & Inteligência Artificial" />
+    <meta property="og:site_name" content="4u Hub" />
+    <meta property="og:title" content="4u Hub — Plataforma de Aplicativos & IA" />
     <meta property="og:description" content="Plataforma de alta performance para descoberta e uso de aplicativos modulares e IA." />
     <meta property="og:image" content="https://4u.ia.br/loja/icon-512.png" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
-    <meta property="og:image:alt" content="4u.ia.br App Store" />
+    <meta property="og:image:alt" content="4u Hub" />
     <meta property="og:locale" content="pt_BR" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://4u.ia.br/loja/" />
-    <meta name="twitter:title" content="4u.ia.br — Loja de Aplicativos & Inteligência Artificial" />
+    <meta name="twitter:title" content="4u Hub — Plataforma de Aplicativos & IA" />
     <meta name="twitter:description" content="Descubra aplicativos modulares, ferramentas com IA e utilitários de alta performance." />
     <meta name="twitter:image" content="https://4u.ia.br/loja/icon-512.png" />
 
@@ -1351,6 +1351,39 @@
             window.open(waUrl, '_blank', 'noopener,noreferrer');
         }
 
+        // -------- Scroll to Search Box --------
+        function scrollToSearchBox() {
+            triggerHaptic();
+            function performScroll() {
+                const input = document.getElementById('storeSearch');
+                if (input) {
+                    const rect = input.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const targetY = scrollTop + rect.top - 100;
+                    window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+                    
+                    const wrapper = input.closest('.group') || input.parentElement;
+                    if (wrapper) {
+                        wrapper.classList.add('ring-2', 'ring-emerald-400', 'scale-[1.01]', 'transition-all');
+                        setTimeout(() => {
+                            wrapper.classList.remove('ring-2', 'ring-emerald-400', 'scale-[1.01]');
+                        }, 900);
+                    }
+                    setTimeout(() => {
+                        input.focus();
+                        input.select();
+                    }, 350);
+                }
+            }
+
+            if (currentRoute() !== 'store') {
+                window.location.hash = '#/';
+                setTimeout(performScroll, 200);
+            } else {
+                performScroll();
+            }
+        }
+
         // -------- Command Palette (Ctrl+K) --------
         function openCmdPalette() {
             triggerHaptic();
@@ -1999,7 +2032,7 @@
                                     ${storeLogoMarkup()}
                                     <div class="leading-tight min-w-0">
                                         <div class="flex items-center gap-2 sm:gap-2.5">
-                                            <span class="text-base sm:text-lg font-bold tracking-tight gradient-text">4u.ia.br</span>
+                                            <span class="text-base sm:text-lg font-bold tracking-tight gradient-text">4u Hub</span>
                                             ${backendBadge()}
                                         </div>
                                         <div class="text-xs text-zinc-400 mt-0.5 hidden sm:block">Plataforma de Aplicativos & IA</div>
@@ -2011,10 +2044,10 @@
                                     <span>📲</span>
                                     <span class="hidden sm:inline font-medium">Instalar App</span>
                                 </button>
-                                <button type="button" class="open-cmd rounded-xl border border-white/10 bg-white/5 p-2 sm:px-3 sm:py-2 text-xs text-zinc-300 hover:bg-white/10 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer" title="Busca rápida (Ctrl+K)">
+                                <button type="button" class="scroll-to-search rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2 sm:px-3 sm:py-2 text-xs text-zinc-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer glow-sm" title="Ir para a busca (atalho /)">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                     <span class="hidden sm:inline font-medium">Buscar</span>
-                                    <kbd class="hidden sm:inline-block rounded bg-white/10 px-1 py-0.5 text-[9px] text-zinc-400 font-mono">Ctrl+K</kbd>
+                                    <kbd class="hidden sm:inline-block rounded bg-white/10 px-1 py-0.5 text-[9px] text-emerald-300 font-mono">/</kbd>
                                 </button>
                                 <button type="button" class="open-suggest rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 cursor-pointer glow-sm" title="Sugerir uma nova ferramenta ou relatar um bug">
                                     <span>💡</span>
@@ -2034,7 +2067,7 @@
                         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                         <span class="text-[10px] font-medium">Início</span>
                     </button>
-                    <button type="button" class="open-cmd flex flex-col items-center gap-1 text-zinc-400 hover:text-white cursor-pointer">
+                    <button type="button" class="scroll-to-search flex flex-col items-center gap-1 text-zinc-400 hover:text-emerald-400 transition-colors cursor-pointer">
                         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <span class="text-[10px] font-medium">Busca</span>
                     </button>
@@ -2058,13 +2091,13 @@
             <div class="glass border-gradient rounded-2xl bg-[#0a0c14]/60 px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                 <div class="flex items-center gap-2.5"> 
                     ${logo ? `<img src="${escapeHtml(logo)}" alt="Logo" class="h-6 w-6 rounded-lg object-cover ring-1 ring-white/10" />` : `<div class="h-6 w-6 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 grid place-items-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" class="text-white"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`} 
-                    <span class="text-sm font-bold text-white tracking-tight">4u.ia.br</span>
+                    <span class="text-sm font-bold text-white tracking-tight">4u Hub</span>
                     <span class="text-zinc-500 hidden md:inline">· Transformando ideias em apps</span>
                     <span class="text-zinc-600 hidden sm:inline">© ${new Date().getFullYear()}</span>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-zinc-400">
                     <a class="hover:text-white transition-colors" href="#/">Vitrine</a>
-                    <button type="button" class="open-cmd hover:text-white transition-colors cursor-pointer">🔍 Busca</button>
+                    <button type="button" class="scroll-to-search hover:text-white transition-colors cursor-pointer">🔍 Busca</button>
                     <button type="button" class="open-suggest text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer">💡 Sugerir App</button>
                     ${showAdmin ? `<a class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors" href="#/admin">Admin</a>` : ''}
                     <button type="button" class="open-privacy hover:text-zinc-200 transition-colors cursor-pointer">Privacidade</button>
@@ -3023,6 +3056,7 @@
             $('#mobNavHome')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
             $('#mobNavFavs')?.addEventListener('click', () => { state.store.favoritesOnly = !state.store.favoritesOnly; state.store.visible = state.store.pageSize; renderStore(); });
             $$('.open-cmd').forEach(b => b.addEventListener('click', openCmdPalette));
+            $$('.scroll-to-search').forEach(b => b.addEventListener('click', scrollToSearchBox));
 
             const sliderPrevBtn = $('#sliderPrev');
             const sliderNextBtn = $('#sliderNext');
@@ -4816,6 +4850,15 @@
                     return;
                 }
 
+                // Scroll to Store Search
+                const scrollSearchBtn = target.closest('.scroll-to-search');
+                if (scrollSearchBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    scrollToSearchBox();
+                    return;
+                }
+
                 // Command Palette Launcher
                 const openCmdBtn = target.closest('.open-cmd');
                 if (openCmdBtn) {
@@ -5068,7 +5111,7 @@
                     const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
                     if (isTyping) return;
                     e.preventDefault();
-                    $('#storeSearch')?.focus();
+                    scrollToSearchBox();
                 }
             });
 
