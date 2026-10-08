@@ -985,18 +985,18 @@
         </div>
     </div>
 
-    <dialog id="detailsDialog" class="w-full max-w-2xl">
+    <dialog id="detailsDialog" class="w-full max-w-4xl lg:max-w-5xl">
         <div
-            class="glass border-gradient rounded-3xl bg-[#0a0c14]/95 p-6 sm:p-8 overflow-auto max-h-[85vh] text-zinc-100">
-            <div class="flex items-center justify-between mb-5">
+            class="glass border-gradient rounded-3xl bg-[#0a0c14]/95 p-4 sm:p-6 overflow-y-auto lg:overflow-hidden max-h-[94vh] text-zinc-100 flex flex-col">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/5 shrink-0">
                 <div class="flex items-center gap-2">
-                    <div class="h-1.5 w-1.5 rounded-full bg-indigo-400"></div>
-                    <div class="text-sm font-semibold text-white">Detalhes do App</div>
+                    <div class="h-2 w-2 rounded-full bg-emerald-400"></div>
+                    <div class="text-xs sm:text-sm font-semibold text-white">Detalhes do App</div>
                 </div>
                 <button id="detailsClose"
-                    class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 hover:bg-white/10 transition-all hover:border-white/20">Fechar</button>
+                    class="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/10 hover:text-white transition-all cursor-pointer">✕ Fechar</button>
             </div>
-            <div id="detailsBody"></div>
+            <div id="detailsBody" class="flex-1 min-h-0"></div>
         </div>
     </dialog>
 
@@ -3361,77 +3361,115 @@
             const needsMic = /microfone|gravad|fala|transcri|áudio|audio|voz/i.test(fullText);
 
             $('#detailsBody').innerHTML = `
-                ${heroImg ? `
-                    <div class="relative overflow-hidden rounded-2xl border border-white/10 aspect-video w-full flex items-center justify-center mb-6 bg-cover bg-center" style="background-image: url('${escapeHtml(heroImg)}');">
-                        <div class="absolute inset-0 backdrop-blur-xl bg-[#0a0c14]/40"></div>
-                        <img alt="" src="${escapeHtml(heroImg)}" class="relative z-10 max-h-full max-w-full object-contain rounded-2xl" />
-                        <div class="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0c14]/80 via-transparent to-transparent pointer-events-none"></div>
-                    </div>
-                ` : ''}
-                <div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
-                    <img alt="" src="${escapeHtml(icon)}" class="h-24 w-24 rounded-2xl object-cover ring-2 ring-white/15 shrink-0 app-icon-squircle shadow-xl" />
-                    <div class="min-w-0 flex-1">
-                        <div class="flex flex-wrap items-center gap-2 mb-2">
-                            <h2 class="text-2xl font-bold tracking-tight text-white">${escapeHtml(app.title || 'Sem título')}</h2>
-                            ${app.status ? statusPill(app.status) : ''}
-                            ${clicks > 0 ? `<span class="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/20">🔥 ${clicks} acessos</span>` : ''}
-                            ${needsCamera ? `<span class="rounded-full bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-300 ring-1 ring-cyan-400/20 inline-flex items-center gap-1">📷 Câmera</span>` : ''}
-                            ${needsMic ? `<span class="rounded-full bg-purple-500/10 px-2.5 py-1 text-xs font-semibold text-purple-300 ring-1 ring-purple-400/20 inline-flex items-center gap-1">🎙️ Microfone</span>` : ''}
-                        </div>
-                        <span class="inline-flex rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 ring-1 ring-white/10 mb-3">${escapeHtml(app.category || 'Sem categoria')}</span>
-                        <p class="text-zinc-300">${escapeHtml(app.shortDescription || '')}</p>
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            ${(tags.length ? tags : ['Sem tags']).map(t => `<span class="rounded-full bg-white/5 px-3 py-1.5 text-xs text-zinc-300 ring-1 ring-white/10">#${escapeHtml(t)}</span>`).join('')}
-                        </div>
-                        <div class="mt-5 grid gap-3 text-xs text-zinc-400 sm:grid-cols-3">
-                            <div class="rounded-xl border border-white/10 bg-white/5 p-3.5">
-                                <div class="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">Criado</div>
-                                <div class="text-zinc-200 font-medium">${escapeHtml(fmtDate(app.createdAt || Date.now()))}</div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+                    <!-- Coluna da Esquerda: Mídia, Estatísticas & Tags -->
+                    <div class="${heroImg ? 'lg:col-span-5' : 'hidden'} flex flex-col gap-2.5">
+                        ${heroImg ? `
+                            <div class="relative overflow-hidden rounded-2xl border border-white/10 aspect-video max-h-[210px] w-full flex items-center justify-center bg-[#050709] bg-cover bg-center shadow-lg shadow-black/50" style="background-image: url('${escapeHtml(heroImg)}');">
+                                <div class="absolute inset-0 backdrop-blur-md bg-[#0a0c14]/30"></div>
+                                <img alt="" src="${escapeHtml(heroImg)}" class="relative z-10 max-h-full max-w-full object-contain rounded-xl" />
+                                <div class="absolute inset-0 z-20 bg-gradient-to-t from-[#0a0c14]/80 via-transparent to-transparent pointer-events-none"></div>
                             </div>
-                            <div class="rounded-xl border border-white/10 bg-white/5 p-3.5">
-                                <div class="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">Atualizado</div>
-                                <div class="text-zinc-200 font-medium">${escapeHtml(fmtDate(app.updatedAt || app.createdAt || Date.now()))}</div>
+                        ` : ''}
+
+                        <!-- Estatísticas Compactas -->
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <div class="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+                                <div class="text-[10px] uppercase tracking-wider text-zinc-500">Criado</div>
+                                <div class="text-zinc-200 font-medium text-[11px] truncate mt-0.5">${escapeHtml(fmtDate(app.createdAt || Date.now()))}</div>
                             </div>
-                            <div class="rounded-xl border border-white/10 bg-white/5 p-3.5">
-                                <div class="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">Popularidade</div>
-                                <div class="text-amber-300 font-semibold flex items-center gap-1">🔥 ${clicks} cliques</div>
+                            <div class="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+                                <div class="text-[10px] uppercase tracking-wider text-zinc-500">Atualizado</div>
+                                <div class="text-zinc-200 font-medium text-[11px] truncate mt-0.5">${escapeHtml(fmtDate(app.updatedAt || app.createdAt || Date.now()))}</div>
+                            </div>
+                            <div class="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+                                <div class="text-[10px] uppercase tracking-wider text-zinc-500">Acessos</div>
+                                <div class="text-amber-300 font-semibold text-[11px] truncate mt-0.5">🔥 ${clicks}</div>
                             </div>
                         </div>
-                        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <button type="button" id="detailsOpenIframe" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-3 text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-lg shadow-emerald-500/20">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                <span class="pointer-events-none">Testar na Loja (Modal)</span>
-                            </button>
-                            <button type="button" id="detailsOpen" class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/10 transition-all cursor-pointer">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                <span class="pointer-events-none">Nova Aba</span>
-                            </button>
-                            <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                                <button type="button" id="detailsQr" class="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10 transition-all cursor-pointer" title="📲 QR Code para Smartphone">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/></svg>
-                                </button>
-                                <button type="button" id="detailsWhatsapp" class="grid h-11 w-11 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-all cursor-pointer" title="💬 Compartilhar no WhatsApp">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                                </button>
-                                <button type="button" class="fav-btn grid h-11 w-11 place-items-center rounded-xl border transition-all cursor-pointer ${isFavorite(app.id) ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20' : 'border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10'}" aria-pressed="${isFavorite(app.id) ? 'true' : 'false'}" title="${isFavorite(app.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" data-id="${escapeHtml(app.id)}">
-                                    ${heartSvg(isFavorite(app.id))}
-                                </button>
-                                <button type="button" id="detailsShare" class="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10 transition-all cursor-pointer" title="Compartilhar">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 6l-4-4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                                </button>
-                                <button type="button" id="detailsCopy" class="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10 transition-all cursor-pointer" title="Copiar link do app">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M16 4H8a2 2 0 0 0-2 2v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 6h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                </button>
-                                <button type="button" id="detailsOpenSeo" class="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10 transition-all cursor-pointer" title="Abrir página (SEO)">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M14 3h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                </button>
-                            </div>
+
+                        <!-- Tags -->
+                        <div class="flex flex-wrap gap-1.5 max-h-14 overflow-y-auto">
+                            ${(tags.length ? tags : ['Geral']).map(t => `<span class="rounded-lg bg-white/5 px-2 py-0.5 text-[11px] text-zinc-400 ring-1 ring-white/10">#${escapeHtml(t)}</span>`).join('')}
                         </div>
                     </div>
-                </div>
-                <div class="mt-6">
-                    <h3 class="text-sm font-semibold text-white mb-3">Descrição completa</h3>
-                    <div class="whitespace-pre-wrap rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-300 leading-relaxed">${escapeHtml(app.fullDescription || 'Sem descrição completa.')}</div>
+
+                    <!-- Coluna da Direita: Identidade, Ações e Descrição -->
+                    <div class="${heroImg ? 'lg:col-span-7' : 'lg:col-span-12'} flex flex-col justify-between gap-3 min-w-0">
+                        <!-- Identidade do App -->
+                        <div>
+                            <div class="flex items-start gap-3 sm:gap-4">
+                                <img alt="" src="${escapeHtml(icon)}" class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl object-cover ring-2 ring-white/15 shrink-0 app-icon-squircle shadow-lg" />
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                        <h2 class="text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">${escapeHtml(app.title || 'Sem título')}</h2>
+                                        ${app.status ? statusPill(app.status) : ''}
+                                        <span class="rounded-full bg-white/5 px-2 py-0.5 text-[11px] font-medium text-emerald-300 ring-1 ring-emerald-400/20">${escapeHtml(app.category || 'Geral')}</span>
+                                        ${needsCamera ? `<span class="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-400/20">📷 Câmera</span>` : ''}
+                                        ${needsMic ? `<span class="rounded-full bg-purple-500/10 px-2 py-0.5 text-[10px] font-semibold text-purple-300 ring-1 ring-purple-400/20">🎙️ Microfone</span>` : ''}
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed line-clamp-2">${escapeHtml(app.shortDescription || '')}</p>
+                                </div>
+                            </div>
+
+                            ${!heroImg ? `
+                                <div class="grid grid-cols-3 gap-2 text-xs my-2.5">
+                                    <div class="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+                                        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Criado</div>
+                                        <div class="text-zinc-200 font-medium text-[11px] truncate mt-0.5">${escapeHtml(fmtDate(app.createdAt || Date.now()))}</div>
+                                    </div>
+                                    <div class="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+                                        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Atualizado</div>
+                                        <div class="text-zinc-200 font-medium text-[11px] truncate mt-0.5">${escapeHtml(fmtDate(app.updatedAt || app.createdAt || Date.now()))}</div>
+                                    </div>
+                                    <div class="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+                                        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Acessos</div>
+                                        <div class="text-amber-300 font-semibold text-[11px] truncate mt-0.5">🔥 ${clicks}</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Botões de Ação Principais -->
+                            <div class="mt-3 pt-3 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                <button type="button" id="detailsOpenIframe" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white hover:from-emerald-400 hover:to-cyan-400 transition-all btn-shine cursor-pointer shadow-md shadow-emerald-500/20">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="pointer-events-none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    <span class="pointer-events-none">Testar na Loja (Modal)</span>
+                                </button>
+                                <button type="button" id="detailsOpen" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-zinc-200 hover:bg-white/10 transition-all cursor-pointer">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                    <span class="pointer-events-none">Nova Aba</span>
+                                </button>
+                                <div class="flex items-center justify-end gap-1.5 shrink-0">
+                                    <button type="button" id="detailsQr" class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="📲 QR Code">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/></svg>
+                                    </button>
+                                    <button type="button" id="detailsWhatsapp" class="grid h-9 w-9 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-all cursor-pointer" title="💬 Compartilhar no WhatsApp">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pointer-events-none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                    </button>
+                                    <button type="button" class="fav-btn grid h-9 w-9 place-items-center rounded-xl border transition-all cursor-pointer ${isFavorite(app.id) ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20' : 'border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white'}" aria-pressed="${isFavorite(app.id) ? 'true' : 'false'}" title="${isFavorite(app.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" data-id="${escapeHtml(app.id)}">
+                                        ${heartSvg(isFavorite(app.id))}
+                                    </button>
+                                    <button type="button" id="detailsShare" class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="Compartilhar">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 6l-4-4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                    </button>
+                                    <button type="button" id="detailsCopy" class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="Copiar link do app">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M16 4H8a2 2 0 0 0-2 2v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 6h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                    <button type="button" id="detailsOpenSeo" class="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer" title="Página SEO">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="pointer-events-none"><path d="M14 3h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descrição Completa -->
+                        <div class="mt-1">
+                            <div class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                <span>📄</span><span>Descrição Completa</span>
+                            </div>
+                            <div class="whitespace-pre-wrap rounded-xl border border-white/10 bg-black/30 p-3 text-xs text-zinc-300 leading-relaxed max-h-36 sm:max-h-40 overflow-y-auto">${escapeHtml(app.fullDescription || app.shortDescription || 'Sem descrição adicional.')}</div>
+                        </div>
+                    </div>
                 </div>
             `;
 
